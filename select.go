@@ -25,8 +25,12 @@ func (s *Select) Where(cond string, args ...interface{}) *Select {
 	if s.where == nil {
 		s.where = &condition{phrase: "WHERE"}
 	}
-	s.where.addExpression(cond, args)
+	s.where.addExpression(cond, args...)
 	return s
+}
+
+func (s *Select) And(cond string, args ...interface{}) *Select {
+	return s.Where(cond, args...)
 }
 
 func (s *Select) Build() (query string, binds []interface{}) {
