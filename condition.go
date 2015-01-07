@@ -5,42 +5,31 @@ import (
 	"strings"
 )
 
-type Condition struct {
-	Phrase  string
-	Queries []string
-	Binds   []interface{}
+type condition struct {
+	phrase  string
+	queries []string
+	binds   []interface{}
 }
 
-type ConditionParam struct {
-	Condition string
-	Args      []interface{}
-}
-
-func (c *Condition) SetConditions(params []ConditionParam) {
-	for _, param := range params {
-		c.AddExpression(param)
-	}
-}
-
-func (c *Condition) AddExpression(param ConditionParam) {
+func (c *condition) addExpression(cond string, args ...interface{}) {
 	var query string
 	var binds []interface{}
-	switch len(param.Args) {
+	switch len(args) {
 	case 0:
-		query = param.Condition
+		query = cond
 	case 1:
-		query = fmt.Sprintf("%s = ?", param.Condition)
-		binds = append(binds, param.Args[0])
+		query = fmt.Sprintf("%s = ?", cond)
+		binds = append(binds, args[0])
 	case 2:
-		query = fmt.Sprintf("%s %s ?", param.Condition, param.Args[0])
-		binds = append(binds, param.Args[1])
+		query = fmt.Sprintf("%s %s ?", cond, args[0])
+		binds = append(binds, args[1])
 	default:
 		query = ""
 	}
-	c.Queries = append(c.Queries, query)
-	c.Binds = append(c.Binds, binds...)
+	c.queries = append(c.queries, query)
+	c.binds = append(c.binds, binds...)
 }
 
-func (c *Condition) Build() (query string, binds []interface{}) {
-	return fmt.Sprintf(" %s %s", c.Phrase, strings.Join(c.Queries, " AND ")), c.Binds
+func (c *condition) build() (query string, binds []interface{}) {
+	return fmt.Sprintf(" %s %s", c.phrase, strings.Join(c.queries, " AND ")), c.binds
 }

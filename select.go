@@ -8,7 +8,7 @@ import (
 type Select struct {
 	table   string
 	columns []string
-	where   *Condition
+	where   *condition
 }
 
 func (s *Select) Table(table string) *Select {
@@ -21,16 +21,16 @@ func (s *Select) Columns(columns []string) *Select {
 	return s
 }
 
-func (s *Select) Where(conditions []ConditionParam) *Select {
+func (s *Select) Where(cond string, args ...interface{}) *Select {
 	if s.where == nil {
-		s.where = &Condition{Phrase: "WHERE"}
+		s.where = &condition{phrase: "WHERE"}
 	}
-	s.where.SetConditions(conditions)
+	s.where.addExpression(cond, args)
 	return s
 }
 
 func (s *Select) Build() (query string, binds []interface{}) {
 	baseQuery := fmt.Sprintf("SELECT %s FROM %s", strings.Join(s.columns, ", "), s.table)
-	whereQuery, whereBinds := s.where.Build()
+	whereQuery, whereBinds := s.where.build()
 	return baseQuery + whereQuery, whereBinds
 }
