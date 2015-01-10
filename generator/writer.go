@@ -30,7 +30,7 @@ import "github.com/monochromegane/goar"
 {{range .}}
 func {{.Name | capitalize}}(db *goar.DB) *{{.Name}}Relation {
 	sel := &goar.Select{}
-	sel.Table("{{.Name}}").Columns({{.FieldNames | join}})
+	sel.Table("{{.Name}}").Columns({{.ColumnNames | join}})
 	return &{{.Name}}Relation{db, sel}
 }
 {{end}}

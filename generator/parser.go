@@ -3,6 +3,7 @@ package generator
 import (
 	"go/ast"
 	"go/token"
+	"regexp"
 	"strings"
 )
 
@@ -55,10 +56,10 @@ type structType struct {
 	Fields     []field
 }
 
-func (s structType) FieldNames() []string {
+func (s structType) ColumnNames() []string {
 	names := []string{}
 	for _, f := range s.Fields {
-		names = append(names, f.Name)
+		names = append(names, f.ColumnName())
 	}
 	return names
 }
@@ -66,7 +67,42 @@ func (s structType) FieldNames() []string {
 type field struct {
 	typ  string
 	Name string
-	tag  string
+	tag  tag
+}
+
+func (f field) ColumnName() string {
+	if tag := f.tag.get("column"); tag != "" {
+		return tag
+	}
+	return f.toSnakeCase()
+}
+
+type tag string
+
+func (t tag) tags() []string {
+	return strings.Split(string(t), " ")
+}
+
+func (t tag) get(key string) string {
+	var value string
+	for _, tag := range t.tags() {
+		if !strings.HasPrefix(tag, key+":") {
+			continue
+		}
+		pair := strings.SplitN(tag, ":", 1)
+		if !strings.HasPrefix(pair[1], "\"") || !strings.HasSuffix(pair[1], "\"") {
+			continue
+		}
+		return strings.Trim(pair[1], "\"")
+	}
+	return value
+}
+
+func (f field) toSnakeCase() string {
+	const snake = "${1}_${2}"
+	reg1 := regexp.MustCompile("([A-Z]+)([A-Z][a-z])")
+	reg2 := regexp.MustCompile("([a-z])([A-Z])")
+	return strings.ToLower(reg2.ReplaceAllString(reg1.ReplaceAllString(f.Name, snake), snake))
 }
 
 func findComments(commments []*ast.Comment, anotation string) ([]string, bool) {
@@ -99,7 +135,7 @@ func findStruct(specs []ast.Spec) (structType, bool) {
 				typ:  f.Type.(*ast.Ident).Name,
 			}
 			if f.Tag != nil {
-				field.tag = f.Tag.Value
+				field.tag = tag(f.Tag.Value)
 			}
 			st.Fields = append(st.Fields, field)
 		}
