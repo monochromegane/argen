@@ -6,20 +6,59 @@ import (
 	"strings"
 )
 
-type Struct struct {
-	Package    string
-	Anotations []string
-	Name       string
-	Fields     []Field
+func AnotatedStructs(f *ast.File, anotation string) structs {
+
+	structs := structs{}
+
+	pkg := f.Name.Name
+	ast.Inspect(f, func(n ast.Node) bool {
+
+		g, ok := n.(*ast.GenDecl)
+
+		if !ok || g.Tok != token.TYPE {
+			return true
+		}
+
+		comments, hasAnotation := findComments(g.Doc.List, anotation)
+		if !hasAnotation {
+			return true
+		}
+
+		st, ok := findStruct(g.Specs)
+		if !ok {
+			return true
+		}
+
+		st.anotations = comments
+		st.pkg = pkg
+
+		structs = append(structs, st)
+		return false
+	})
+
+	return structs
 }
 
-type Field struct {
-	Typ  string
-	Name string
-	Tag  string
+type structs []structType
+
+func (s structs) pkg() string {
+	return s[0].pkg
 }
 
-func findAnotationComments(commments []*ast.Comment, anotation string) ([]string, bool) {
+type structType struct {
+	pkg        string
+	anotations []string
+	name       string
+	fields     []field
+}
+
+type field struct {
+	typ  string
+	name string
+	tag  string
+}
+
+func findComments(commments []*ast.Comment, anotation string) ([]string, bool) {
 	result := []string{}
 	hasAnotation := false
 	for _, c := range commments {
@@ -33,47 +72,23 @@ func findAnotationComments(commments []*ast.Comment, anotation string) ([]string
 	return result, hasAnotation
 }
 
-func AnotatedStructs(f *ast.File, anotation string) []Struct {
-
-	result := []Struct{}
-
-	pkg := f.Name.Name
-	ast.Inspect(f, func(n ast.Node) bool {
-
-		g, ok := n.(*ast.GenDecl)
-
-		if !ok || g.Tok != token.TYPE {
-			return true
+func findStruct(specs []ast.Spec) (structType, bool) {
+	st := structType{}
+	for _, spec := range specs {
+		t := spec.(*ast.TypeSpec)
+		s, ok := t.Type.(*ast.StructType)
+		if !ok {
+			return st, false
 		}
 
-		st := Struct{Package: pkg}
-
-		comments, hasAnotation := findAnotationComments(g.Doc.List, anotation)
-		if !hasAnotation {
-			return true
+		st.name = t.Name.Name
+		for _, f := range s.Fields.List {
+			st.fields = append(st.fields, field{
+				name: f.Names[0].Name,
+				typ:  f.Type.(*ast.Ident).Name,
+				tag:  f.Tag.Value,
+			})
 		}
-		st.Anotations = comments
-
-		for _, spec := range g.Specs {
-			t := spec.(*ast.TypeSpec)
-			st.Name = t.Name.Name
-
-			s, ok := t.Type.(*ast.StructType)
-			if !ok {
-				return true
-			}
-
-			for _, f := range s.Fields.List {
-				st.Fields = append(st.Fields, Field{
-					Name: f.Names[0].Name,
-					Typ:  f.Type.(*ast.Ident).Name,
-					Tag:  f.Tag.Value,
-				})
-			}
-		}
-		result = append(result, st)
-		return false
-	})
-
-	return result
+	}
+	return st, true
 }

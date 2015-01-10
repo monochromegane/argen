@@ -1,26 +1,31 @@
 package goar
 
 import (
-	"fmt"
+	"bufio"
 	"io"
+	"os"
 	"text/template"
 )
 
-func Write(w io.Writer, st *Struct) {
-
-	tplText := `
-package {{.Package}}
-
-import "github.com/monochromegane/goar"
-
-type {{.Name}}Relation struct {
-	db *goar.DB
-	*goar.Select
-}
-`
-	tpl := template.Must(template.New("t").Parse(tplText))
-	if err := tpl.Execute(w, st); err != nil {
-		fmt.Println(err)
+func writeToFile(file string, structs structs) error {
+	f, err := os.Create(file)
+	if err != nil {
+		return err
 	}
 
+	w := bufio.NewWriter(f)
+	defer w.Flush()
+
+	return write(w, structs)
+}
+
+func write(w io.Writer, structs structs) error {
+
+	const tplText = `package {{.pkg}}
+`
+	tpl := template.Must(template.New("t").Parse(tplText))
+	if err := tpl.Execute(w, structs); err != nil {
+		return err
+	}
+	return nil
 }
