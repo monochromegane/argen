@@ -16,7 +16,7 @@ func (s *Select) Table(table string) *Select {
 	return s
 }
 
-func (s *Select) Columns(columns []string) *Select {
+func (s *Select) Columns(columns ...string) *Select {
 	s.columns = columns
 	return s
 }
