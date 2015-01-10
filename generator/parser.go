@@ -41,20 +41,31 @@ func AnotatedStructs(f *ast.File, anotation string) structs {
 
 type structs []structType
 
-func (s structs) pkg() string {
+func (s structs) Package() string {
+	if len(s) == 0 {
+		return ""
+	}
 	return s[0].pkg
 }
 
 type structType struct {
 	pkg        string
 	anotations []string
-	name       string
-	fields     []field
+	Name       string
+	Fields     []field
+}
+
+func (s structType) FieldNames() []string {
+	names := []string{}
+	for _, f := range s.Fields {
+		names = append(names, f.Name)
+	}
+	return names
 }
 
 type field struct {
 	typ  string
-	name string
+	Name string
 	tag  string
 }
 
@@ -81,13 +92,16 @@ func findStruct(specs []ast.Spec) (structType, bool) {
 			return st, false
 		}
 
-		st.name = t.Name.Name
+		st.Name = t.Name.Name
 		for _, f := range s.Fields.List {
-			st.fields = append(st.fields, field{
-				name: f.Names[0].Name,
+			field := field{
+				Name: f.Names[0].Name,
 				typ:  f.Type.(*ast.Ident).Name,
-				tag:  f.Tag.Value,
-			})
+			}
+			if f.Tag != nil {
+				field.tag = f.Tag.Value
+			}
+			st.Fields = append(st.Fields, field)
 		}
 	}
 	return st, true
