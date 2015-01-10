@@ -7,6 +7,7 @@ import (
 )
 
 type Struct struct {
+	Package    string
 	Anotations []string
 	Name       string
 	Fields     []Field
@@ -36,14 +37,16 @@ func AnotatedStructs(f *ast.File, anotation string) []Struct {
 
 	result := []Struct{}
 
+	pkg := f.Name.Name
 	ast.Inspect(f, func(n ast.Node) bool {
+
 		g, ok := n.(*ast.GenDecl)
 
 		if !ok || g.Tok != token.TYPE {
 			return true
 		}
 
-		st := Struct{}
+		st := Struct{Package: pkg}
 
 		comments, hasAnotation := findAnotationComments(g.Doc.List, anotation)
 		if !hasAnotation {
