@@ -1,4 +1,4 @@
-package goar
+package generator
 
 type Option struct {
 }

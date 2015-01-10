@@ -1,4 +1,4 @@
-package goar
+package generator
 
 import (
 	"go/parser"
