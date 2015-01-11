@@ -56,12 +56,39 @@ type structType struct {
 	Fields     []field
 }
 
+func (s structType) FieldNames(prefix string) []string {
+	names := []string{}
+	for _, f := range s.Fields {
+		names = append(names, prefix+f.Name)
+	}
+	return names
+}
+
 func (s structType) ColumnNames() []string {
 	names := []string{}
 	for _, f := range s.Fields {
 		names = append(names, f.ColumnName())
 	}
 	return names
+}
+
+func (s structType) PrimaryKey() string {
+	k, _ := s.primaryKey()
+	return k
+}
+
+func (s structType) PrimaryKeyType() string {
+	_, t := s.primaryKey()
+	return t
+}
+
+func (s structType) primaryKey() (string, string) {
+	for _, f := range s.Fields {
+		if f.isPrimaryKey() {
+			return f.Name, f.typ
+		}
+	}
+	return "id", "int"
 }
 
 type field struct {
@@ -75,6 +102,13 @@ func (f field) ColumnName() string {
 		return tag
 	}
 	return f.toSnakeCase()
+}
+
+func (f field) isPrimaryKey() bool {
+	if pk := f.tag.get("db"); pk == "pk" {
+		return true
+	}
+	return false
 }
 
 type tag string
