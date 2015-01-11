@@ -3,15 +3,16 @@ package generator
 import (
 	"go/parser"
 	"go/token"
+	"strings"
 )
 
-func Generate(from, to string) error {
+func Generate(from string, opts Option) error {
 	structs, err := parse(from)
 	if err != nil {
 		return err
 	}
 
-	err = writeToFile(to, structs)
+	err = writeToFile(toFileName(from, opts.Prefix, opts.Suffix), structs)
 	if err != nil {
 		return err
 	}
@@ -26,4 +27,9 @@ func parse(file string) (structs, error) {
 		return nil, err
 	}
 	return AnotatedStructs(f, "+goar"), nil
+}
+
+func toFileName(from, prefix, suffix string) string {
+	names := strings.Split(from, ".")
+	return prefix + names[0] + suffix + ".go"
 }

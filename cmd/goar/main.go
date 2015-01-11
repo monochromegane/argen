@@ -24,7 +24,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = generator.Generate(from, "gen.txt")
+	err = generator.Generate(from, opts)
 	if err != nil {
 		fmt.Printf("%v\n", err)
 	}
