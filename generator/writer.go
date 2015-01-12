@@ -26,22 +26,46 @@ func write(w io.Writer, structs structs) error {
 
 	const tplText = `package {{.Package}}
 
-import "github.com/monochromegane/goar"
+import (
+	"database/sql"
+	
+	"github.com/monochromegane/goar"
+)
+
+var db *sql.DB
+
+func Use(DB *sql.DB) {
+	db = DB
+}
 {{range .}}
-func {{.Name | capitalize}}(db *goar.DB) *{{.Name}}Relation {
+func (m {{.Name}}) Find(id {{.PrimaryKeyType}}) (*{{.Name}}, error) {
+	r := m.newRelation()
+        q, b := r.Select.Where("{{.PrimaryKey}}", id).Build()
+        row := &{{.Name}}{}
+        if err := db.QueryRow(q, b...).Scan({{.FieldNames "&row."| joinField}}); err != nil {
+                return nil, err
+        }
+        return row, nil
+}
+
+func (m {{.Name}}) Where(cond string, args ...interface{}) *{{.Name}}Relation {
+	r := m.newRelation()
+        return r.Where(cond, args...)
+}
+
+func (m *{{.Name}}) newRelation() *{{.Name}}Relation {
 	sel := &goar.Select{}
 	sel.Table("{{.Name}}").Columns({{.ColumnNames | joinColumn}})
-	return &{{.Name}}Relation{db, sel}
+	return &{{.Name}}Relation{sel}
 }
 
 type {{.Name}}Relation struct {
-	db *goar.DB
 	*goar.Select
 }
 
 func (r *{{.Name}}Relation) Query() ([]*{{.Name}}, error) {
         q, b := r.Build()
-        rows, err := r.db.Query(q, b...)
+        rows, err := db.Query(q, b...)
         if err != nil {
                 return nil, err
         }
@@ -56,15 +80,6 @@ func (r *{{.Name}}Relation) Query() ([]*{{.Name}}, error) {
                 results = append(results, row)
         }
         return results, nil
-}
-
-func (r *{{.Name}}Relation) Find(id {{.PrimaryKeyType}}) (*{{.Name}}, error) {
-        q, b := r.Select.Where("{{.PrimaryKey}}", id).Build()
-        row := &{{.Name}}{}
-        if err := r.db.QueryRow(q, b...).Scan({{.FieldNames "&row."| joinField}}); err != nil {
-                return nil, err
-        }
-        return row, nil
 }
 
 func (r *{{.Name}}Relation) Where(cond string, args ...interface{}) *{{.Name}}Relation {
