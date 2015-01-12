@@ -18,10 +18,12 @@ func main() {
 	}
 
 	from := os.Getenv("GOFILE")
-	if from == "" && len(args) > 0 {
-		from = args[0]
-	} else {
-		os.Exit(1)
+	if from == "" {
+		if len(args) > 0 {
+			from = args[0]
+		} else {
+			os.Exit(1)
+		}
 	}
 
 	err = generator.Generate(from, opts)
