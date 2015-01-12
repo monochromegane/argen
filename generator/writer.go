@@ -8,6 +8,8 @@ import (
 	"strings"
 	"text/template"
 	"unicode"
+
+	"github.com/gedex/inflector"
 )
 
 func writeToFile(file string, structs structs) error {
@@ -28,7 +30,7 @@ func write(w io.Writer, structs structs) error {
 
 import (
 	"database/sql"
-	
+
 	"github.com/monochromegane/goar"
 )
 
@@ -40,7 +42,7 @@ func Use(DB *sql.DB) {
 {{range .}}
 func (m {{.Name}}) Find(id {{.PrimaryKeyType}}) (*{{.Name}}, error) {
 	r := m.newRelation()
-        q, b := r.Select.Where("{{.PrimaryKey}}", id).Build()
+        q, b := r.Select.Where("{{.PrimaryKeyColumn}}", id).Build()
         row := &{{.Name}}{}
         if err := db.QueryRow(q, b...).Scan({{.FieldNames "&row."| joinField}}); err != nil {
                 return nil, err
@@ -82,6 +84,15 @@ func (r *{{.Name}}Relation) Query() ([]*{{.Name}}, error) {
         return results, nil
 }
 
+func (r *{{.Name}}Relation) First() (*{{.Name}}, error) {
+	q, b := r.OrderBy("{{.PrimaryKeyColumn}}", goar.ASC).Limit(1).Build()
+        row := &{{.Name}}{}
+        if err := db.QueryRow(q, b...).Scan({{.FieldNames "&row."| joinField}}); err != nil {
+                return nil, err
+        }
+        return row, nil
+}
+
 func (r *{{.Name}}Relation) Where(cond string, args ...interface{}) *{{.Name}}Relation {
         r.Select.Where(cond, args...)
         return r
@@ -91,13 +102,31 @@ func (r *{{.Name}}Relation) And(cond string, args ...interface{}) *{{.Name}}Rela
         r.Select.And(cond, args...)
         return r
 }
+{{$model := .}}
+{{range .Anotations}}
+{{if .BelongsTo}}
+func (m *{{$model.Name}}) {{.Arg | capitalize}}() (*{{.Arg | capitalize}}, error) {
+	return {{.Arg | capitalize}}{}.Where("{{$model.PrimaryKeyColumn}}", m.{{.Arg | capitalize}}ID).First()
+}
+{{else if .HasOne}}
+func (m *{{$model.Name}}) {{.Arg | capitalize}}() ([]*{{.Arg | capitalize}}, error) {
+	return {{.Arg | capitalize | singularize}}{}.Where("{{$model.TableName}}_id", m.{{$model.PrimaryKeyField}}).First()
+}
+{{else if .HasMany}}
+func (m *{{$model.Name}}) {{.Arg | capitalize}}() ([]*{{.Arg | capitalize | singularize}}, error) {
+	return {{.Arg | capitalize | singularize}}{}.Where("{{$model.TableName}}_id", m.{{$model.PrimaryKeyField}}).Query()
+}
+{{end}}
+{{end}}
 {{end}}
 `
 	t := template.New("t")
 	t.Funcs(template.FuncMap{
-		"capitalize": capitalize,
-		"joinColumn": joinColumn,
-		"joinField":  joinField,
+		"capitalize":  capitalize,
+		"joinColumn":  joinColumn,
+		"joinField":   joinField,
+		"singularize": inflector.Singularize,
+		"pluralize":   inflector.Pluralize,
 	})
 	tpl := template.Must(t.Parse(tplText))
 	if err := tpl.Execute(w, structs); err != nil {

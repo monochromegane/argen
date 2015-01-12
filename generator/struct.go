@@ -16,9 +16,13 @@ func (s structs) Package() string {
 
 type structType struct {
 	pkg        string
-	anotations []string
+	Anotations []anotation
 	Name       string
 	Fields     []field
+}
+
+func (s structType) TableName() string {
+	return toSnakeCase(s.Name)
 }
 
 func (s structType) FieldNames(prefix string) []string {
@@ -37,23 +41,55 @@ func (s structType) ColumnNames() []string {
 	return names
 }
 
-func (s structType) PrimaryKey() string {
-	k, _ := s.primaryKey()
-	return k
+func (s structType) PrimaryKeyField() string {
+	f, _, _ := s.primaryKey()
+	return f
+}
+
+func (s structType) PrimaryKeyColumn() string {
+	_, c, _ := s.primaryKey()
+	return c
 }
 
 func (s structType) PrimaryKeyType() string {
-	_, t := s.primaryKey()
+	_, _, t := s.primaryKey()
 	return t
 }
 
-func (s structType) primaryKey() (string, string) {
+func (s structType) primaryKey() (string, string, string) {
 	for _, f := range s.Fields {
 		if f.isPrimaryKey() {
-			return f.Name, f.typ
+			return f.Name, f.ColumnName(), f.typ
 		}
 	}
-	return "id", "int"
+	return "ID", "id", "int"
+}
+
+type anotation string
+
+func (a anotation) Arg() string {
+	s := strings.Split(string(a), " ")
+	if len(s) < 2 {
+		return ""
+	}
+	return s[1]
+}
+
+func (a anotation) Option(key string) string {
+	// similar to tag.Get()
+	return ""
+}
+
+func (a anotation) BelongsTo() bool {
+	return strings.HasPrefix(string(a), "+belongs_to")
+}
+
+func (a anotation) HasOne() bool {
+	return strings.HasPrefix(string(a), "+has_one")
+}
+
+func (a anotation) HasMany() bool {
+	return strings.HasPrefix(string(a), "+has_many")
 }
 
 type field struct {
@@ -66,7 +102,7 @@ func (f field) ColumnName() string {
 	if tag := f.tag.get("column"); tag != "" {
 		return tag
 	}
-	return f.toSnakeCase()
+	return toSnakeCase(f.Name)
 }
 
 func (f field) isPrimaryKey() bool {
@@ -74,6 +110,13 @@ func (f field) isPrimaryKey() bool {
 		return true
 	}
 	return false
+}
+
+func toSnakeCase(s string) string {
+	const snake = "${1}_${2}"
+	reg1 := regexp.MustCompile("([A-Z]+)([A-Z][a-z])")
+	reg2 := regexp.MustCompile("([a-z])([A-Z])")
+	return strings.ToLower(reg2.ReplaceAllString(reg1.ReplaceAllString(s, snake), snake))
 }
 
 type tag string
@@ -85,21 +128,15 @@ func (t tag) tags() []string {
 func (t tag) get(key string) string {
 	var value string
 	for _, tag := range t.tags() {
+		tag = strings.Trim(tag, "`")
 		if !strings.HasPrefix(tag, key+":") {
 			continue
 		}
-		pair := strings.SplitN(tag, ":", 1)
+		pair := strings.SplitN(tag, ":", 2)
 		if !strings.HasPrefix(pair[1], "\"") || !strings.HasSuffix(pair[1], "\"") {
 			continue
 		}
 		return strings.Trim(pair[1], "\"")
 	}
 	return value
-}
-
-func (f field) toSnakeCase() string {
-	const snake = "${1}_${2}"
-	reg1 := regexp.MustCompile("([A-Z]+)([A-Z][a-z])")
-	reg2 := regexp.MustCompile("([a-z])([A-Z])")
-	return strings.ToLower(reg2.ReplaceAllString(reg1.ReplaceAllString(f.Name, snake), snake))
 }

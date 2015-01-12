@@ -29,7 +29,7 @@ func AnotatedStructs(f *ast.File, anotation string) structs {
 			return true
 		}
 
-		st.anotations = comments
+		st.Anotations = comments
 		st.pkg = pkg
 
 		structs = append(structs, st)
@@ -39,16 +39,15 @@ func AnotatedStructs(f *ast.File, anotation string) structs {
 	return structs
 }
 
-func findComments(commments []*ast.Comment, anotation string) ([]string, bool) {
-	result := []string{}
+func findComments(commments []*ast.Comment, mark string) ([]anotation, bool) {
+	result := []anotation{}
 	hasAnotation := false
 	for _, c := range commments {
 		t := strings.TrimSpace(strings.TrimLeft(c.Text, "//"))
-		if !strings.HasPrefix(t, anotation) {
-			continue
+		if strings.HasPrefix(t, mark) {
+			hasAnotation = true
 		}
-		hasAnotation = true
-		result = append(result, t)
+		result = append(result, anotation(t))
 	}
 	return result, hasAnotation
 }
