@@ -93,6 +93,15 @@ func (r *{{.Name}}Relation) First() (*{{.Name}}, error) {
         return row, nil
 }
 
+func (r *{{.Name}}Relation) Last() (*{{.Name}}, error) {
+	q, b := r.OrderBy("{{.PrimaryKeyColumn}}", goar.DESC).Limit(1).Build()
+        row := &{{.Name}}{}
+        if err := db.QueryRow(q, b...).Scan({{.FieldNames "&row."| joinField}}); err != nil {
+                return nil, err
+        }
+        return row, nil
+}
+
 func (r *{{.Name}}Relation) Where(cond string, args ...interface{}) *{{.Name}}Relation {
         r.Select.Where(cond, args...)
         return r
