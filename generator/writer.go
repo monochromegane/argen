@@ -63,6 +63,17 @@ func (m *{{.Name}}) IsPersistent() bool {
 	return !m.IsNewRecord()
 }
 
+type {{.Name}}Params {{.Name}}
+
+func (m {{.Name}}) Create(p {{.Name}}Params) (*{{.Name}}, error) {
+	n := &{{.Name}}{
+	{{range .FieldNames ""}}{{.}}: p.{{.}},
+	{{end}}
+	}
+	err := n.Save()
+	return n, err
+}
+
 func (m *{{.Name}}) Save() error {
 	if m.IsNewRecord() {
 		ins := &goar.Insert{}
