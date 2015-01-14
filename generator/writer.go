@@ -55,6 +55,37 @@ func (m {{.Name}}) Where(cond string, args ...interface{}) *{{.Name}}Relation {
         return r.Where(cond, args...)
 }
 
+func (m *{{.Name}}) IsNewRecord() bool {
+	return goar.IsZero(m.{{.PrimaryKeyField}})
+}
+
+func (m *{{.Name}}) Save() error {
+	if m.IsNewRecord() {
+		ins := &goar.Insert{}
+		q, b := ins.Table("{{.Name}}").Params(goar.Params{ {{$f := .FieldNames "m."}}
+		{{range $index, $column := .ColumnNames}}"{{$column}}": {{index $f $index}},
+		{{end}}
+		}).Build()
+
+		if _, err := db.Exec(q, b...); err != nil {
+			return err
+		}
+		return nil
+	}else{
+		upd := &goar.Update{}
+		q, b := upd.Table("{{.Name}}").Params(goar.Params{ {{$f := .FieldNames "m."}}
+		{{range $index, $column := .ColumnNames}}"{{$column}}": {{index $f $index}},
+		{{end}}
+		}).Where("{{.PrimaryKeyColumn}}", m.{{.PrimaryKeyField}}).Build()
+
+		if _, err := db.Exec(q, b...); err != nil {
+			return err
+		}
+		return nil
+	}
+	return nil
+}
+
 func (m *{{.Name}}) newRelation() *{{.Name}}Relation {
 	sel := &goar.Select{}
 	sel.Table("{{.Name}}").Columns({{.ColumnNames | joinColumn}})
