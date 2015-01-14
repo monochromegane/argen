@@ -59,6 +59,10 @@ func (m *{{.Name}}) IsNewRecord() bool {
 	return goar.IsZero(m.{{.PrimaryKeyField}})
 }
 
+func (m *{{.Name}}) IsPersistent() bool {
+	return !m.IsNewRecord()
+}
+
 func (m *{{.Name}}) Save() error {
 	if m.IsNewRecord() {
 		ins := &goar.Insert{}
