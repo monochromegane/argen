@@ -1,4 +1,4 @@
-package generator
+package gen
 
 import (
 	"bufio"
@@ -56,7 +56,7 @@ func (m {{.Name}}) Where(cond string, args ...interface{}) *{{.Name}}Relation {
 }
 
 func (m *{{.Name}}) IsNewRecord() bool {
-	return goar.IsZero(m.{{.PrimaryKeyField}})
+	return ar.IsZero(m.{{.PrimaryKeyField}})
 }
 
 func (m *{{.Name}}) IsPersistent() bool {
@@ -76,8 +76,8 @@ func (m {{.Name}}) Create(p {{.Name}}Params) (*{{.Name}}, error) {
 
 func (m *{{.Name}}) Save() error {
 	if m.IsNewRecord() {
-		ins := &goar.Insert{}
-		q, b := ins.Table("{{.Name}}").Params(goar.Params{ {{$f := .FieldNames "m."}}
+		ins := &ar.Insert{}
+		q, b := ins.Table("{{.Name}}").Params(ar.Params{ {{$f := .FieldNames "m."}}
 		{{range $index, $column := .ColumnNames}}"{{$column}}": {{index $f $index}},
 		{{end}}
 		}).Build()
@@ -87,8 +87,8 @@ func (m *{{.Name}}) Save() error {
 		}
 		return nil
 	}else{
-		upd := &goar.Update{}
-		q, b := upd.Table("{{.Name}}").Params(goar.Params{ {{$f := .FieldNames "m."}}
+		upd := &ar.Update{}
+		q, b := upd.Table("{{.Name}}").Params(ar.Params{ {{$f := .FieldNames "m."}}
 		{{range $index, $column := .ColumnNames}}"{{$column}}": {{index $f $index}},
 		{{end}}
 		}).Where("{{.PrimaryKeyColumn}}", m.{{.PrimaryKeyField}}).Build()
@@ -102,13 +102,13 @@ func (m *{{.Name}}) Save() error {
 }
 
 func (m *{{.Name}}) newRelation() *{{.Name}}Relation {
-	sel := &goar.Select{}
+	sel := &ar.Select{}
 	sel.Table("{{.Name}}").Columns({{.ColumnNames | joinColumn}})
 	return &{{.Name}}Relation{sel}
 }
 
 type {{.Name}}Relation struct {
-	*goar.Select
+	*ar.Select
 }
 
 func (r *{{.Name}}Relation) Query() ([]*{{.Name}}, error) {
@@ -131,7 +131,7 @@ func (r *{{.Name}}Relation) Query() ([]*{{.Name}}, error) {
 }
 
 func (r *{{.Name}}Relation) First() (*{{.Name}}, error) {
-	q, b := r.OrderBy("{{.PrimaryKeyColumn}}", goar.ASC).Limit(1).Build()
+	q, b := r.OrderBy("{{.PrimaryKeyColumn}}", ar.ASC).Limit(1).Build()
         row := &{{.Name}}{}
         if err := db.QueryRow(q, b...).Scan({{.FieldNames "&row."| joinField}}); err != nil {
                 return nil, err
@@ -140,7 +140,7 @@ func (r *{{.Name}}Relation) First() (*{{.Name}}, error) {
 }
 
 func (r *{{.Name}}Relation) Last() (*{{.Name}}, error) {
-	q, b := r.OrderBy("{{.PrimaryKeyColumn}}", goar.DESC).Limit(1).Build()
+	q, b := r.OrderBy("{{.PrimaryKeyColumn}}", ar.DESC).Limit(1).Build()
         row := &{{.Name}}{}
         if err := db.QueryRow(q, b...).Scan({{.FieldNames "&row."| joinField}}); err != nil {
                 return nil, err

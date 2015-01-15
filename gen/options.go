@@ -1,4 +1,4 @@
-package generator
+package gen
 
 type Option struct {
 	Prefix string `short:"p" description:"Add prefix to generated file name." default:""`

@@ -1,4 +1,4 @@
-package generator
+package gen
 
 import (
 	"go/parser"
@@ -26,7 +26,7 @@ func parse(file string) (structs, error) {
 	if err != nil {
 		return nil, err
 	}
-	return AnotatedStructs(f, "+goar"), nil
+	return AnotatedStructs(f, "+AR"), nil
 }
 
 func toFileName(from, prefix, suffix string) string {

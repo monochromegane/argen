@@ -5,10 +5,10 @@ import (
 	"os"
 
 	"github.com/jessevdk/go-flags"
-	"github.com/monochromegane/goar/generator"
+	"github.com/monochromegane/goar/gen"
 )
 
-var opts generator.Option
+var opts gen.Option
 
 func main() {
 
@@ -26,7 +26,7 @@ func main() {
 		}
 	}
 
-	err = generator.Generate(from, opts)
+	err = gen.Generate(from, opts)
 	if err != nil {
 		fmt.Printf("%v\n", err)
 	}
