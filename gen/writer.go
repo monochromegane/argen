@@ -40,6 +40,14 @@ func Use(DB *sql.DB) {
 	db = DB
 }
 {{range .}}
+var {{.Name}}Scopes = map[string]{{.Name}}Scope{}
+
+type {{.Name}}Scope func(r *{{.Name}}Relation, args ...interface{}) *{{.Name}}Relation
+
+func (m {{.Name}}) Scope(name string, scope {{.Name}}Scope) {
+        {{.Name}}Scopes[name] = scope
+}
+
 func (m {{.Name}}) Find(id {{.PrimaryKeyType}}) (*{{.Name}}, error) {
 	r := m.newRelation()
         q, b := r.Select.Where("{{.PrimaryKeyColumn}}", id).Build()
@@ -170,6 +178,14 @@ func (m *{{$model.Name}}) {{.Arg | capitalize}}() ([]*{{.Arg | capitalize}}, err
 {{else if .HasMany}}
 func (m *{{$model.Name}}) {{.Arg | capitalize}}() ([]*{{.Arg | capitalize | singularize}}, error) {
 	return {{.Arg | capitalize | singularize}}{}.Where("{{$model.TableName}}_id", m.{{$model.PrimaryKeyField}}).Query()
+}
+{{else if .Scope}}
+func (m {{$model.Name}}) {{.Arg}}(args ...interface{}) *{{$model.Name}}Relation {
+        return {{$model.Name}}Scopes["{{.Arg}}"](m.newRelation(), args...)
+}
+
+func (r *{{$model.Name}}Relation) {{.Arg}}(args ...interface{}) *{{$model.Name}}Relation {
+        return {{$model.Name}}Scopes["{{.Arg}}"](r, args...)
 }
 {{end}}
 {{end}}

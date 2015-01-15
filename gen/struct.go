@@ -92,6 +92,10 @@ func (a anotation) HasMany() bool {
 	return strings.HasPrefix(string(a), "+has_many")
 }
 
+func (a anotation) Scope() bool {
+	return strings.HasPrefix(string(a), "+scope")
+}
+
 type field struct {
 	typ  string
 	Name string
