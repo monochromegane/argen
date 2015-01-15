@@ -187,6 +187,11 @@ func (r *{{.Name}}Relation) Group(group string, groups ...string) *{{.Name}}Rela
         return r
 }
 
+func (r *{{.Name}}Relation) Having(cond string, args ...interface{}) *{{.Name}}Relation {
+        r.Select.Having(cond, args...)
+        return r
+}
+
 {{$model := .}}
 {{range .Anotations}}
 {{if .BelongsTo}}

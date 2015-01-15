@@ -13,6 +13,7 @@ type Select struct {
 	offset  *offset
 	groupBy *groupBy
 	where   *condition
+	having  *condition
 }
 
 func (s *Select) Table(table string) *Select {
@@ -57,14 +58,31 @@ func (s *Select) GroupBy(group string, groups ...string) *Select {
 	return s
 }
 
+func (s *Select) Having(cond string, args ...interface{}) *Select {
+	if s.having == nil {
+		s.having = &condition{phrase: "HAVING"}
+	}
+	s.having.addExpression(cond, args...)
+	return s
+}
+
 func (s *Select) Build() (string, []interface{}) {
 	baseQuery := fmt.Sprintf("SELECT %s FROM %s", strings.Join(s.columns, ", "), s.table)
 	whereQuery, whereBinds := s.where.build()
 	limitQuery, limitBinds := s.limit.build()
 	offsetQuery, offsetBinds := s.offset.build()
 	groupQuery := s.groupBy.build()
+	havingQuery, havingBinds := s.having.build()
 	orderQuery := s.orderBy.build()
 	binds := append(whereBinds, limitBinds...)
+	binds = append(binds, havingBinds...)
 	binds = append(binds, offsetBinds...)
-	return baseQuery + whereQuery + limitQuery + offsetQuery + groupQuery + orderQuery, binds
+	return baseQuery +
+			whereQuery +
+			limitQuery +
+			offsetQuery +
+			groupQuery +
+			havingQuery +
+			orderQuery,
+		binds
 }
