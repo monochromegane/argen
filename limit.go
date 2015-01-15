@@ -9,5 +9,5 @@ func (l *limit) setLimit(limit int) {
 }
 
 func (l *limit) build() (query string, binds []interface{}) {
-	return "LIMIT ?", []interface{}{l.limit}
+	return " LIMIT ?", []interface{}{l.limit}
 }

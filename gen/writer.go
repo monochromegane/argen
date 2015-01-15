@@ -166,6 +166,21 @@ func (r *{{.Name}}Relation) And(cond string, args ...interface{}) *{{.Name}}Rela
         r.Select.And(cond, args...)
         return r
 }
+
+func (r *{{.Name}}Relation) Order(column, order string) *{{.Name}}Relation {
+        r.Select.OrderBy(column, order)
+        return r
+}
+
+func (r *{{.Name}}Relation) Limit(limit int) *{{.Name}}Relation {
+        r.Select.Limit(limit)
+        return r
+}
+
+func (r *{{.Name}}Relation) Offset(offset int) *{{.Name}}Relation {
+        r.Select.Offset(offset)
+        return r
+}
 {{$model := .}}
 {{range .Anotations}}
 {{if .BelongsTo}}

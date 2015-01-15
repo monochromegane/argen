@@ -10,6 +10,7 @@ type Select struct {
 	columns []string
 	orderBy *orderBy
 	limit   *limit
+	offset  *offset
 	where   *condition
 }
 
@@ -45,8 +46,17 @@ func (s *Select) Limit(limit int) *Select {
 	return s
 }
 
-func (s *Select) Build() (query string, binds []interface{}) {
+func (s *Select) Offset(offset int) *Select {
+	s.offset.setOffset(offset)
+	return s
+}
+
+func (s *Select) Build() (string, []interface{}) {
 	baseQuery := fmt.Sprintf("SELECT %s FROM %s", strings.Join(s.columns, ", "), s.table)
 	whereQuery, whereBinds := s.where.build()
-	return baseQuery + whereQuery, whereBinds
+	limitQuery, limitBinds := s.limit.build()
+	offsetQuery, offsetBinds := s.offset.build()
+	binds := append(whereBinds, limitBinds...)
+	binds = append(binds, offsetBinds...)
+	return baseQuery + whereQuery + limitQuery + offsetQuery, binds
 }
