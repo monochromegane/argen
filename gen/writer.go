@@ -181,6 +181,12 @@ func (r *{{.Name}}Relation) Offset(offset int) *{{.Name}}Relation {
         r.Select.Offset(offset)
         return r
 }
+
+func (r *{{.Name}}Relation) Group(group string, groups ...string) *{{.Name}}Relation {
+        r.Select.GroupBy(group, groups...)
+        return r
+}
+
 {{$model := .}}
 {{range .Anotations}}
 {{if .BelongsTo}}

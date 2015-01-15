@@ -11,6 +11,7 @@ type Select struct {
 	orderBy *orderBy
 	limit   *limit
 	offset  *offset
+	groupBy *groupBy
 	where   *condition
 }
 
@@ -51,12 +52,19 @@ func (s *Select) Offset(offset int) *Select {
 	return s
 }
 
+func (s *Select) GroupBy(group string, groups ...string) *Select {
+	s.groupBy.setGroups(group, groups...)
+	return s
+}
+
 func (s *Select) Build() (string, []interface{}) {
 	baseQuery := fmt.Sprintf("SELECT %s FROM %s", strings.Join(s.columns, ", "), s.table)
 	whereQuery, whereBinds := s.where.build()
 	limitQuery, limitBinds := s.limit.build()
 	offsetQuery, offsetBinds := s.offset.build()
+	groupQuery := s.groupBy.build()
+	orderQuery := s.orderBy.build()
 	binds := append(whereBinds, limitBinds...)
 	binds = append(binds, offsetBinds...)
-	return baseQuery + whereQuery + limitQuery + offsetQuery, binds
+	return baseQuery + whereQuery + limitQuery + offsetQuery + groupQuery + orderQuery, binds
 }
