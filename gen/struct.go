@@ -16,7 +16,7 @@ func (s structs) Package() string {
 
 type structType struct {
 	pkg        string
-	Anotations []anotation
+	Anotations anotations
 	Name       string
 	Fields     []field
 }
@@ -65,6 +65,17 @@ func (s structType) primaryKey() (string, string, string) {
 	return "ID", "id", "int"
 }
 
+type anotations []anotation
+
+func (as anotations) DefaultScope() anotation {
+	for _, a := range as {
+		if a.DefaultScope() {
+			return a
+		}
+	}
+	return ""
+}
+
 type anotation string
 
 func (a anotation) Arg() string {
@@ -94,6 +105,10 @@ func (a anotation) HasMany() bool {
 
 func (a anotation) Scope() bool {
 	return strings.HasPrefix(string(a), "+scope")
+}
+
+func (a anotation) DefaultScope() bool {
+	return strings.HasPrefix(string(a), "+default_scope")
 }
 
 type field struct {

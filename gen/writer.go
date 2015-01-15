@@ -112,7 +112,8 @@ func (m *{{.Name}}) Save() error {
 func (m *{{.Name}}) newRelation() *{{.Name}}Relation {
 	sel := &ar.Select{}
 	sel.Table("{{.Name}}").Columns({{.ColumnNames | joinColumn}})
-	return &{{.Name}}Relation{sel}
+	r := &{{.Name}}Relation{sel}
+	return r.defaultScope()
 }
 
 type {{.Name}}Relation struct {
@@ -189,6 +190,12 @@ func (r *{{$model.Name}}Relation) {{.Arg}}(args ...interface{}) *{{$model.Name}}
 }
 {{end}}
 {{end}}
+func (r *{{.Name}}Relation) defaultScope() *{{.Name}}Relation {
+        if s := {{.Name}}Scopes["{{.Anotations.DefaultScope.Arg}}"]; s != nil {
+                return s(r)
+        }
+        return r
+}
 {{end}}
 `
 	t := template.New("t")

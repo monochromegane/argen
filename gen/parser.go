@@ -39,8 +39,8 @@ func AnotatedStructs(f *ast.File, anotation string) structs {
 	return structs
 }
 
-func findComments(commments []*ast.Comment, mark string) ([]anotation, bool) {
-	result := []anotation{}
+func findComments(commments []*ast.Comment, mark string) (anotations, bool) {
+	result := anotations{}
 	hasAnotation := false
 	for _, c := range commments {
 		t := strings.TrimSpace(strings.TrimLeft(c.Text, "//"))
