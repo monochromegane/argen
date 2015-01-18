@@ -40,14 +40,6 @@ func Use(DB *sql.DB) {
 	db = DB
 }
 {{range .}}
-var {{.Name}}Scopes = map[string]{{.Name}}Scope{}
-
-type {{.Name}}Scope func(r *{{.Name}}Relation, args ...interface{}) *{{.Name}}Relation
-
-func (m {{.Name}}) Scope(name string, scope {{.Name}}Scope) {
-        {{.Name}}Scopes[name] = scope
-}
-
 func (m {{.Name}}) Find(id {{.PrimaryKeyType}}) (*{{.Name}}, error) {
 	r := m.newRelation()
         q, b := r.Select.Where("{{.PrimaryKeyColumn}}", id).Build()
@@ -112,11 +104,12 @@ func (m *{{.Name}}) Save() error {
 func (m *{{.Name}}) newRelation() *{{.Name}}Relation {
 	sel := &ar.Select{}
 	sel.Table("{{.Name}}").Columns({{.ColumnNames | joinColumn}})
-	r := &{{.Name}}Relation{sel}
+	r := &{{.Name}}Relation{m, sel}
 	return r.defaultScope()
 }
 
 type {{.Name}}Relation struct {
+	src *{{.Name}}
 	*ar.Select
 }
 
@@ -206,22 +199,29 @@ func (m *{{$model.Name}}) {{.Arg | capitalize}}() ([]*{{.Arg | capitalize}}, err
 func (m *{{$model.Name}}) {{.Arg | capitalize}}() ([]*{{.Arg | capitalize | singularize}}, error) {
 	return {{.Arg | capitalize | singularize}}{}.Where("{{$model.TableName}}_id", m.{{$model.PrimaryKeyField}}).Query()
 }
-{{else if .Scope}}
-func (m {{$model.Name}}) {{.Arg}}(args ...interface{}) *{{$model.Name}}Relation {
-        return {{$model.Name}}Scopes["{{.Arg}}"](m.newRelation(), args...)
+{{end}}
+{{end}}
+{{range .Funcs}}
+{{if .Scope}}
+func (m {{$model.Name}}) {{trimPrefix .Name "scope" | capitalize}}(args ...interface{}) *{{$model.Name}}Relation {
+        return m.{{.Name}}(m.newRelation(), args...)
 }
 
-func (r *{{$model.Name}}Relation) {{.Arg}}(args ...interface{}) *{{$model.Name}}Relation {
-        return {{$model.Name}}Scopes["{{.Arg}}"](r, args...)
+func (r *{{$model.Name}}Relation) {{trimPrefix .Name "scope" | capitalize}}(args ...interface{}) *{{$model.Name}}Relation {
+        return r.src.{{.Name}}(r, args...)
+}
+{{end}}
+{{if .DefaultScope}}
+func (r *{{$model.Name}}Relation) defaultScope() *{{$model.Name}}Relation {
+        return r.src.{{.Name}}(r)
 }
 {{end}}
 {{end}}
-func (r *{{.Name}}Relation) defaultScope() *{{.Name}}Relation {
-        if s := {{.Name}}Scopes["{{.Anotations.DefaultScope.Arg}}"]; s != nil {
-                return s(r)
-        }
+{{if not .Funcs.HasDefaultScope}}
+func (r *{{$model.Name}}Relation) defaultScope() *{{$model.Name}}Relation {
         return r
 }
+{{end}}
 {{end}}
 `
 	t := template.New("t")
@@ -231,6 +231,7 @@ func (r *{{.Name}}Relation) defaultScope() *{{.Name}}Relation {
 		"joinField":   joinField,
 		"singularize": inflector.Singularize,
 		"pluralize":   inflector.Pluralize,
+		"trimPrefix":  strings.TrimPrefix,
 	})
 	tpl := template.Must(t.Parse(tplText))
 	if err := tpl.Execute(w, structs); err != nil {

@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-type structs []structType
+type structs []*structType
 
 func (s structs) Package() string {
 	if len(s) == 0 {
@@ -19,6 +19,7 @@ type structType struct {
 	Anotations anotations
 	Name       string
 	Fields     []field
+	Funcs      funcs
 }
 
 func (s structType) TableName() string {
@@ -158,4 +159,34 @@ func (t tag) get(key string) string {
 		return strings.Trim(pair[1], "\"")
 	}
 	return value
+}
+
+type funcs []funcType
+
+func (fs funcs) HasDefaultScope() bool {
+	for _, f := range fs {
+		if f.DefaultScope() {
+			return true
+		}
+	}
+	return false
+}
+
+type funcType struct {
+	Recv       string
+	Anotations anotations
+	Name       string
+}
+
+func (f funcType) Scope() bool {
+	return strings.HasPrefix(f.Name, "scope")
+}
+
+func (f funcType) DefaultScope() bool {
+	for _, a := range f.Anotations {
+		if a.DefaultScope() {
+			return true
+		}
+	}
+	return false
 }

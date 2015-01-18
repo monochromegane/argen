@@ -19,7 +19,7 @@ func AnotatedStructs(f *ast.File, anotation string) structs {
 			return true
 		}
 
-		comments, hasAnotation := findComments(g.Doc.List, anotation)
+		comments, hasAnotation := findAnotatedComments(g.Doc.List, anotation)
 		if !hasAnotation {
 			return true
 		}
@@ -39,7 +39,46 @@ func AnotatedStructs(f *ast.File, anotation string) structs {
 	return structs
 }
 
-func findComments(commments []*ast.Comment, mark string) (anotations, bool) {
+func StructFuncs(f *ast.File) map[string]funcs {
+
+	structFuncs := map[string]funcs{}
+
+	ast.Inspect(f, func(n ast.Node) bool {
+
+		f, ok := n.(*ast.FuncDecl)
+
+		if !ok {
+			return true
+		}
+
+		recv, ok := findRecv(f.Recv)
+		if !ok {
+			return true
+		}
+
+		fn := funcType{
+			Recv:       recv,
+			Name:       f.Name.Name,
+			Anotations: findComments(f.Doc.List),
+		}
+
+		structFuncs[recv] = append(structFuncs[recv], fn)
+		return false
+	})
+
+	return structFuncs
+}
+
+func findComments(commments []*ast.Comment) anotations {
+	result := anotations{}
+	for _, c := range commments {
+		t := strings.TrimSpace(strings.TrimLeft(c.Text, "//"))
+		result = append(result, anotation(t))
+	}
+	return result
+}
+
+func findAnotatedComments(commments []*ast.Comment, mark string) (anotations, bool) {
 	result := anotations{}
 	hasAnotation := false
 	for _, c := range commments {
@@ -52,8 +91,8 @@ func findComments(commments []*ast.Comment, mark string) (anotations, bool) {
 	return result, hasAnotation
 }
 
-func findStruct(specs []ast.Spec) (structType, bool) {
-	st := structType{}
+func findStruct(specs []ast.Spec) (*structType, bool) {
+	st := &structType{}
 	for _, spec := range specs {
 		t := spec.(*ast.TypeSpec)
 		s, ok := t.Type.(*ast.StructType)
@@ -74,4 +113,18 @@ func findStruct(specs []ast.Spec) (structType, bool) {
 		}
 	}
 	return st, true
+}
+
+func findRecv(recv *ast.FieldList) (string, bool) {
+	if recv == nil {
+		return "", false
+	}
+	for _, r := range recv.List {
+		f, ok := r.Type.(*ast.Ident)
+		if !ok {
+			return "", false
+		}
+		return f.Name, true
+	}
+	return "", false
 }

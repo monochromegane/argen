@@ -26,7 +26,13 @@ func parse(file string) (structs, error) {
 	if err != nil {
 		return nil, err
 	}
-	return AnotatedStructs(f, "+AR"), nil
+	structs := AnotatedStructs(f, "+AR")
+	funcs := StructFuncs(f)
+
+	for _, st := range structs {
+		st.Funcs = funcs[st.Name]
+	}
+	return structs, nil
 }
 
 func toFileName(from, prefix, suffix string) string {
