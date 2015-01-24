@@ -2,6 +2,10 @@ package gen
 
 type structs []*structType
 
+func (ss structs) Package() string {
+	return ss[0].Package
+}
+
 type structType struct {
 	Package  string
 	Comments comments
