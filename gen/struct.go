@@ -1,6 +1,7 @@
 package gen
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 
@@ -47,6 +48,36 @@ func (s structType) primaryKey() (string, string, string) {
 		}
 	}
 	return "ID", "id", "int"
+}
+
+func (s structType) HasOne() []HasOne {
+	var hasOne []HasOne
+	for _, f := range s.Funcs {
+		if f.HasOne() {
+			hasOne = append(hasOne, HasOne{&s, f})
+		}
+	}
+	return hasOne
+}
+
+func (s structType) HasMany() []HasMany {
+	var hasMany []HasMany
+	for _, f := range s.Funcs {
+		if f.HasMany() {
+			hasMany = append(hasMany, HasMany{&s, f})
+		}
+	}
+	return hasMany
+}
+
+func (s structType) BelongsTo() []BelongsTo {
+	var belongsTo []BelongsTo
+	for _, f := range s.Funcs {
+		if f.BelongsTo() {
+			belongsTo = append(belongsTo, BelongsTo{&s, f})
+		}
+	}
+	return belongsTo
 }
 
 type comments []comment
@@ -98,6 +129,85 @@ type funcType struct {
 	Recv     string
 	Comments comments
 	Name     string
+}
+
+func (f funcType) HasMany() bool {
+	return strings.HasPrefix(f.Name, "hasMany")
+}
+
+func (f funcType) HasOne() bool {
+	return strings.HasPrefix(f.Name, "hasOne")
+}
+
+func (f funcType) BelongsTo() bool {
+	return strings.HasPrefix(f.Name, "belongsTo")
+}
+
+type HasOne struct {
+	Recv *structType
+	funcType
+}
+
+func (h HasOne) FuncName() string {
+	return h.funcType.Name
+}
+
+func (h HasOne) Func() string {
+	return strings.Replace(h.funcType.Name, "hasOne", "", 1)
+}
+
+func (h HasOne) Model() string {
+	return inflector.Singularize(h.Func())
+}
+
+func (h HasOne) ForeignKey() string {
+	return fmt.Sprintf("%s_id", toSnakeCase(h.funcType.Recv))
+}
+
+type HasMany struct {
+	Recv *structType
+	funcType
+}
+
+func (h HasMany) FuncName() string {
+	return h.funcType.Name
+}
+
+func (h HasMany) Func() string {
+	return strings.Replace(h.funcType.Name, "hasMany", "", 1)
+}
+
+func (h HasMany) Model() string {
+	return inflector.Singularize(h.Func())
+}
+
+func (h HasMany) ForeignKey() string {
+	return fmt.Sprintf("%s_id", toSnakeCase(h.funcType.Recv))
+}
+
+type BelongsTo struct {
+	Recv *structType
+	funcType
+}
+
+func (b BelongsTo) FuncName() string {
+	return b.funcType.Name
+}
+
+func (b BelongsTo) Func() string {
+	return strings.Replace(b.funcType.Name, "belongsTo", "", 1)
+}
+
+func (b BelongsTo) Model() string {
+	return inflector.Singularize(b.Func())
+}
+
+func (b BelongsTo) PrimaryKey() string {
+	return "id"
+}
+
+func (b BelongsTo) ForeignKey() string {
+	return fmt.Sprintf("%s_id", toSnakeCase(b.Model()))
 }
 
 func toSnakeCase(s string) string {

@@ -50,6 +50,15 @@ func Use(DB *sql.DB) {
 {{template "Offset" .}}
 {{template "Group" .}}
 {{template "Having" .}}
+{{range .HasMany}}
+{{template "HasMany" .}}
+{{end}}
+{{range .HasOne}}
+{{template "HasOne" .}}
+{{end}}
+{{range .BelongsTo}}
+{{template "BelongsTo" .}}
+{{end}}
 {{end}}
 ` + templates.ToString()
 

@@ -19,7 +19,7 @@ func AnotatedStructs(f *ast.File, anotation string) structs {
 			return true
 		}
 
-		comments := findComments(g.Doc.List)
+		comments := findComments(g.Doc)
 		if !isMarked(comments, anotation) {
 			return true
 		}
@@ -59,7 +59,7 @@ func StructFuncs(f *ast.File) map[string]funcs {
 		fn := funcType{
 			Recv:     recv,
 			Name:     f.Name.Name,
-			Comments: findComments(f.Doc.List),
+			Comments: findComments(f.Doc),
 		}
 
 		structFuncs[recv] = append(structFuncs[recv], fn)
@@ -69,9 +69,12 @@ func StructFuncs(f *ast.File) map[string]funcs {
 	return structFuncs
 }
 
-func findComments(cs []*ast.Comment) comments {
+func findComments(cs *ast.CommentGroup) comments {
 	result := comments{}
-	for _, c := range cs {
+	if cs == nil {
+		return result
+	}
+	for _, c := range cs.List {
 		t := strings.TrimSpace(strings.TrimLeft(c.Text, "//"))
 		result = append(result, comment(t))
 	}
