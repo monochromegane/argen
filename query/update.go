@@ -7,7 +7,7 @@ import (
 
 type Update struct {
 	table  string
-	params Params
+	params map[string]interface{}
 	where  *condition
 }
 
@@ -16,7 +16,7 @@ func (u *Update) Table(table string) *Update {
 	return u
 }
 
-func (u *Update) Params(params Params) *Update {
+func (u *Update) Params(params map[string]interface{}) *Update {
 	u.params = params
 	return u
 }

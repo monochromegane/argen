@@ -7,17 +7,15 @@ import (
 
 type Insert struct {
 	table  string
-	params Params
+	params map[string]interface{}
 }
-
-type Params map[string]interface{}
 
 func (i *Insert) Table(table string) *Insert {
 	i.table = table
 	return i
 }
 
-func (i *Insert) Params(params Params) *Insert {
+func (i *Insert) Params(params map[string]interface{}) *Insert {
 	i.params = params
 	return i
 }
