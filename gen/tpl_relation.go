@@ -7,4 +7,12 @@ type {{.Name}}Relation struct {
 	src *{{.Name}}
 	*ar.Relation
 }
+
+func (m *{{.Name}}) newRelation() *{{.Name}}Relation {
+        r := &ar.Relation{}
+        r.Table("{{.TableName}}").Columns({{range .Fields}}
+		"{{.ColumnName}}",{{end}}
+	)
+        return &{{.Name}}Relation{m, r}
+}
 `}

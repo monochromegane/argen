@@ -23,4 +23,15 @@ func (t Template) toDefine() string {
 
 var templates = Templates{
 	relation,
+	query,
+	queryRow,
+	where,
+	and,
+	first,
+	last,
+	order,
+	limit,
+	offset,
+	group,
+	having,
 }

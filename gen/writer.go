@@ -36,6 +36,17 @@ func Use(DB *sql.DB) {
 }
 {{range .}}
 {{template "Relation" .}}
+{{template "Query" .}}
+{{template "QueryRow" .}}
+{{template "First" .}}
+{{template "Last" .}}
+{{template "Where" .}}
+{{template "And" .}}
+{{template "Order" .}}
+{{template "Limit" .}}
+{{template "Offset" .}}
+{{template "Group" .}}
+{{template "Having" .}}
 {{end}}
 ` + templates.ToString()
 
