@@ -11,13 +11,26 @@ const (
 )
 
 type orderBy struct {
-	queries []string
+	orders []order
 }
 
-func (o *orderBy) addOrder(column, order string) {
-	o.queries = append(o.queries, fmt.Sprintf("%s %s", column, order))
+type order struct {
+	column string
+	sort   string
+}
+
+func (o order) build() string {
+	return fmt.Sprintf("%s %s", o.column, o.sort)
+}
+
+func (o *orderBy) addOrder(column, sort string) {
+	o.orders = append(o.orders, order{column, sort})
 }
 
 func (o *orderBy) build() string {
-	return fmt.Sprintf("ORDER BY %s", strings.Join(o.queries, ", "))
+	queries := []string{}
+	for _, o := range o.orders {
+		queries = append(queries, o.build())
+	}
+	return fmt.Sprintf("ORDER BY %s", strings.Join(queries, ", "))
 }
