@@ -59,6 +59,9 @@ func Use(DB *sql.DB) {
 {{range .BelongsTo}}
 {{template "BelongsTo" .}}
 {{end}}
+{{range .Scope}}
+{{template "Scope" .}}
+{{end}}
 {{end}}
 ` + templates.ToString()
 

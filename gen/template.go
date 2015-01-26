@@ -40,4 +40,5 @@ var templates = Templates{
 	hasMany,
 	hasOne,
 	belongsTo,
+	scope,
 }

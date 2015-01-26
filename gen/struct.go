@@ -80,6 +80,16 @@ func (s structType) BelongsTo() []BelongsTo {
 	return belongsTo
 }
 
+func (s structType) Scope() []Scope {
+	var scope []Scope
+	for _, f := range s.Funcs {
+		if f.scope() {
+			scope = append(scope, Scope{&s, f})
+		}
+	}
+	return scope
+}
+
 type comments []comment
 
 type comment string
@@ -141,6 +151,10 @@ func (f funcType) HasOne() bool {
 
 func (f funcType) BelongsTo() bool {
 	return strings.HasPrefix(f.Name, "belongsTo")
+}
+
+func (f funcType) scope() bool {
+	return strings.HasPrefix(f.Name, "scope")
 }
 
 type HasOne struct {
@@ -208,6 +222,19 @@ func (b BelongsTo) PrimaryKey() string {
 
 func (b BelongsTo) ForeignKey() string {
 	return fmt.Sprintf("%s_id", toSnakeCase(b.Model()))
+}
+
+type Scope struct {
+	Recv *structType
+	funcType
+}
+
+func (s Scope) FuncName() string {
+	return s.funcType.Name
+}
+
+func (s Scope) Func() string {
+	return strings.Replace(s.funcType.Name, "scope", "", 1)
 }
 
 func toSnakeCase(s string) string {
