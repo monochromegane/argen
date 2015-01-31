@@ -50,6 +50,7 @@ func Use(DB *sql.DB) {
 {{template "Offset" .}}
 {{template "Group" .}}
 {{template "Having" .}}
+{{template "Validation" .}}
 {{range .HasMany}}
 {{template "HasMany" .}}
 {{end}}

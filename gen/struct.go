@@ -90,6 +90,16 @@ func (s structType) Scope() []Scope {
 	return scope
 }
 
+func (s structType) Validation() []Validation {
+	var validation []Validation
+	for _, f := range s.Funcs {
+		if f.validation() {
+			validation = append(validation, Validation{&s, f})
+		}
+	}
+	return validation
+}
+
 type comments []comment
 
 type comment string
@@ -155,6 +165,10 @@ func (f funcType) BelongsTo() bool {
 
 func (f funcType) scope() bool {
 	return strings.HasPrefix(f.Name, "scope")
+}
+
+func (f funcType) validation() bool {
+	return strings.HasPrefix(f.Name, "validates")
 }
 
 type HasOne struct {
@@ -235,6 +249,19 @@ func (s Scope) FuncName() string {
 
 func (s Scope) Func() string {
 	return strings.Replace(s.funcType.Name, "scope", "", 1)
+}
+
+type Validation struct {
+	Recv *structType
+	funcType
+}
+
+func (v Validation) FuncName() string {
+	return v.funcType.Name
+}
+
+func (v Validation) FieldName() string {
+	return strings.Replace(v.funcType.Name, "validates", "", 1)
 }
 
 func toSnakeCase(s string) string {

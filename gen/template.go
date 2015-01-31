@@ -37,6 +37,7 @@ var templates = Templates{
 	offset,
 	group,
 	having,
+	validation,
 	hasMany,
 	hasOne,
 	belongsTo,
