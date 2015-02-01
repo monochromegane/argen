@@ -35,6 +35,7 @@ func Use(DB *sql.DB) {
 	db = DB
 }
 {{range .}}
+{{template "FieldByName" .}}
 {{template "Find" .}}
 {{template "Create" .}}
 {{template "Save" .}}

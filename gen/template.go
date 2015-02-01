@@ -22,6 +22,7 @@ func (t Template) toDefine() string {
 }
 
 var templates = Templates{
+	fieldByName,
 	create,
 	save,
 	find,
