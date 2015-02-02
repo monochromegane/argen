@@ -26,6 +26,10 @@ func (s *Select) Columns(columns ...string) *Select {
 	return s
 }
 
+func (s *Select) GetColumns() []string {
+	return s.columns
+}
+
 func (s *Select) Where(cond string, args ...interface{}) *Select {
 	if s.where == nil {
 		s.where = &condition{phrase: "WHERE"}

@@ -6,9 +6,7 @@ var queryRow = &Template{
 func (r *{{.Name}}Relation) QueryRow() (*{{.Name}}, error) {
 	q, b := r.Build()
 	row := &{{.Name}}{}
-	err := db.QueryRow(q, b...).Scan({{range .Fields}}
-		&row.{{.Name}},{{end}}
-	)
+	err := db.QueryRow(q, b...).Scan(row.fieldsByName(r.Relation.GetColumns())...)
 	if err != nil {
 		return nil, err
 	}

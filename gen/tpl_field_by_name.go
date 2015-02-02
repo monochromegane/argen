@@ -11,4 +11,13 @@ func (m {{.Name}}) fieldByName(name string) interface{} {
                 return ""
         }
 }
+
+func (m {{.Name}}) fieldsByName(names []string) []interface{} {
+        fields := []interface{}{}
+        for _, n := range names {
+                f := m.fieldByName(n)
+                fields = append(fields, &f)
+        }
+        return fields
+}
 `}

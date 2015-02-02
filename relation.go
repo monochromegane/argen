@@ -30,6 +30,10 @@ func (r *Relation) Columns(columns ...string) *Relation {
 	return r
 }
 
+func (r *Relation) GetColumns() []string {
+	return r.Select.GetColumns()
+}
+
 func (r *Relation) Where(cond string, args ...interface{}) *Relation {
 	r.Select.Where(cond, args...)
 	return r

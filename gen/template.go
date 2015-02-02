@@ -25,6 +25,7 @@ var templates = Templates{
 	fieldByName,
 	create,
 	save,
+	sel,
 	find,
 	relation,
 	query,
