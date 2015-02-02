@@ -13,6 +13,7 @@ func (m *{{.Name}}) newRelation() *{{.Name}}Relation {
         r.Table("{{.TableName}}").Columns({{range .Fields}}
 		"{{.ColumnName}}",{{end}}
 	)
+	{{if .DefaultScope}}m.defaultScope(ar.Scope{r, nil}){{end}}
         return &{{.Name}}Relation{m, r}
 }
 `}

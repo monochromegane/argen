@@ -90,6 +90,15 @@ func (s structType) Scope() []Scope {
 	return scope
 }
 
+func (s structType) DefaultScope() bool {
+	for _, f := range s.Funcs {
+		if f.defaultScope() {
+			return true
+		}
+	}
+	return false
+}
+
 func (s structType) Validation() []Validation {
 	var validation []Validation
 	for _, f := range s.Funcs {
@@ -165,6 +174,10 @@ func (f funcType) BelongsTo() bool {
 
 func (f funcType) scope() bool {
 	return strings.HasPrefix(f.Name, "scope")
+}
+
+func (f funcType) defaultScope() bool {
+	return f.Name == "defaultScope"
 }
 
 func (f funcType) validation() bool {
