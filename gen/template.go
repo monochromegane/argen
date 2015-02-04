@@ -43,5 +43,6 @@ var templates = Templates{
 	hasMany,
 	hasOne,
 	belongsTo,
+	joins,
 	scope,
 }

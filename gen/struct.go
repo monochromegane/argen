@@ -80,6 +80,16 @@ func (s structType) BelongsTo() []BelongsTo {
 	return belongsTo
 }
 
+func (s structType) Joins() []Joins {
+	var joinses []Joins
+	for _, f := range s.Funcs {
+		if f.joins() {
+			joinses = append(joinses, Joins{&s, f})
+		}
+	}
+	return joinses
+}
+
 func (s structType) Scope() []Scope {
 	var scope []Scope
 	for _, f := range s.Funcs {
@@ -172,6 +182,10 @@ func (f funcType) BelongsTo() bool {
 	return strings.HasPrefix(f.Name, "belongsTo")
 }
 
+func (f funcType) joins() bool {
+	return f.HasMany() || f.HasOne() || f.BelongsTo()
+}
+
 func (f funcType) scope() bool {
 	return strings.HasPrefix(f.Name, "scope")
 }
@@ -249,6 +263,41 @@ func (b BelongsTo) PrimaryKey() string {
 
 func (b BelongsTo) ForeignKey() string {
 	return fmt.Sprintf("%s_id", toSnakeCase(b.Model()))
+}
+
+type Joins struct {
+	Recv *structType
+	funcType
+}
+
+func (j Joins) FuncName() string {
+	return j.funcType.Name
+}
+
+func (j Joins) Func() string {
+	funcName := j.funcType.Name
+	words := []string{"belongsTo", "hasMany", "hasOne"}
+	for _, w := range words {
+		funcName = strings.Replace(funcName, w, "", 1)
+
+	}
+	return funcName
+}
+
+func (j Joins) TableName() string {
+	return toSnakeCase(inflector.Pluralize(j.Func()))
+}
+
+func (j Joins) Model() string {
+	return inflector.Singularize(j.Func())
+}
+
+func (j Joins) PrimaryKey() string {
+	return "id"
+}
+
+func (j Joins) ForeignKey() string {
+	return fmt.Sprintf("%s_id", toSnakeCase(j.Model()))
 }
 
 type Scope struct {
