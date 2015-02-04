@@ -14,6 +14,7 @@ type Select struct {
 	groupBy *groupBy
 	where   *condition
 	having  *condition
+	joins   []*join
 }
 
 func (s *Select) Table(table string) *Select {
@@ -70,18 +71,33 @@ func (s *Select) Having(cond string, args ...interface{}) *Select {
 	return s
 }
 
+func (s *Select) InnerJoin(table string, cond string, args ...interface{}) *Select {
+	join := &join{}
+	s.joins = append(s.joins, join.InnerJoin(table, cond, args...))
+	return s
+}
+
 func (s *Select) Build() (string, []interface{}) {
 	baseQuery := fmt.Sprintf("SELECT %s FROM %s", strings.Join(s.columns, ", "), s.table)
+	var binds []interface{}
+	var joinQuery string
+	for _, j := range s.joins {
+		q, b := j.Build()
+		joinQuery += q
+		binds = append(binds, b...)
+	}
 	whereQuery, whereBinds := s.where.build()
 	limitQuery, limitBinds := s.limit.build()
 	offsetQuery, offsetBinds := s.offset.build()
 	groupQuery := s.groupBy.build()
 	havingQuery, havingBinds := s.having.build()
 	orderQuery := s.orderBy.build()
-	binds := append(whereBinds, limitBinds...)
+	binds = append(binds, whereBinds...)
+	binds = append(binds, limitBinds...)
 	binds = append(binds, havingBinds...)
 	binds = append(binds, offsetBinds...)
 	return baseQuery +
+			joinQuery +
 			whereQuery +
 			limitQuery +
 			offsetQuery +
