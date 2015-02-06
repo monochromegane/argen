@@ -12,6 +12,9 @@ func (m *{{.Name}}) IsPersistent() bool {
 }
 
 func (m *{{.Name}}) Save() error {
+	if !m.IsValid() {
+		return fmt.Errorf("%s", "ValidationError")
+	}
         if m.IsNewRecord() {
                 ins := &ar.Insert{}
                 q, b := ins.Table("{{.TableName}}").Params(map[string]interface{}{ {{range .Fields}}
