@@ -2,6 +2,7 @@ package gen
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/gedex/inflector"
@@ -41,6 +42,11 @@ func (f funcType) defaultScope() bool {
 
 func (f funcType) validation() bool {
 	return strings.HasPrefix(f.Name, "validates")
+}
+
+func (f funcType) customValidation() bool {
+	match, _ := regexp.MatchString("^validate[A-Z0-9]", f.Name)
+	return match
 }
 
 type HasOne struct {

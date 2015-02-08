@@ -118,6 +118,16 @@ func (s structType) Validation() []Validation {
 	return validation
 }
 
+func (s structType) CustomValidation() []Validation {
+	var validation []Validation
+	for _, f := range s.Funcs {
+		if f.customValidation() {
+			validation = append(validation, Validation{&s, f})
+		}
+	}
+	return validation
+}
+
 func toSnakeCase(s string) string {
 	const snake = "${1}_${2}"
 	reg1 := regexp.MustCompile("([A-Z]+)([A-Z][a-z])")
