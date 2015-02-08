@@ -1,6 +1,7 @@
 package ar
 
 import (
+	"fmt"
 	"regexp"
 	"unicode/utf8"
 )
@@ -15,6 +16,7 @@ func NewValidator(rule *Validation) Validator {
 
 func (v Validator) IsValid(value interface{}) bool {
 	result := true
+	errors := []error{}
 	if v.rule.presence {
 		if !v.isPersistent(value) {
 			result = false
@@ -26,14 +28,17 @@ func (v Validator) IsValid(value interface{}) bool {
 		}
 	}
 	if v.rule.length != nil {
-		if !v.isMinimumLength(value) {
+		if ok, err := v.isMinimumLength(value); !ok {
 			result = false
+			errors = append(errors, err)
 		}
-		if !v.isMaximumLength(value) {
+		if ok, err := v.isMaximumLength(value); !ok {
 			result = false
+			errors = append(errors, err)
 		}
-		if !v.isLength(value) {
+		if ok, err := v.isLength(value); !ok {
 			result = false
+			errors = append(errors, err)
 		}
 		if !v.inLength(value) {
 			result = false
@@ -84,37 +89,40 @@ func (v Validator) isFormatted(value interface{}) bool {
 	return match
 }
 
-func (v Validator) isMinimumLength(value interface{}) bool {
-	if v.rule.length.minimum == 0 {
-		return true
+func (v Validator) isMinimumLength(value interface{}) (bool, error) {
+	minimum := v.rule.length.minimum
+	if minimum.number == 0 {
+		return true, nil
 	}
-	s, ok := value.(string)
-	if !ok {
-		return false
+	result := utf8.RuneCountInString(fmt.Sprintf("%s", value)) <= minimum.number
+	if !result {
+		return false, fmt.Errorf(minimum.message, minimum.number)
 	}
-	return utf8.RuneCountInString(s) <= v.rule.length.minimum
+	return true, nil
 }
 
-func (v Validator) isMaximumLength(value interface{}) bool {
-	if v.rule.length.maximum == 0 {
-		return true
+func (v Validator) isMaximumLength(value interface{}) (bool, error) {
+	maximum := v.rule.length.maximum
+	if maximum.number == 0 {
+		return true, nil
 	}
-	s, ok := value.(string)
-	if !ok {
-		return false
+	result := utf8.RuneCountInString(fmt.Sprintf("%s", value)) >= maximum.number
+	if !result {
+		return false, fmt.Errorf(maximum.message, maximum.number)
 	}
-	return utf8.RuneCountInString(s) >= v.rule.length.maximum
+	return true, nil
 }
 
-func (v Validator) isLength(value interface{}) bool {
-	if v.rule.length.is == 0 {
-		return true
+func (v Validator) isLength(value interface{}) (bool, error) {
+	is := v.rule.length.is
+	if is.number == 0 {
+		return true, nil
 	}
-	s, ok := value.(string)
-	if !ok {
-		return false
+	result := utf8.RuneCountInString(fmt.Sprintf("%s", value)) == is.number
+	if !result {
+		return false, fmt.Errorf(is.message, is.number)
 	}
-	return utf8.RuneCountInString(s) == v.rule.length.is
+	return true, nil
 }
 
 func (v Validator) inLength(value interface{}) bool {

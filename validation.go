@@ -61,29 +61,52 @@ func (v *Validation) Exclusion(collection ...string) *Validation {
 
 type length struct {
 	*Validation
-	minimum  int
-	maximum  int
-	is       int
+	minimum  *lengthNumber
+	maximum  *lengthNumber
+	is       *lengthNumber
 	from, to int
+}
+
+type lengthNumber struct {
+	*length
+	number  int
+	message string
+}
+
+func (l *lengthNumber) Rule() *Validation {
+	return l.length.Validation
+}
+
+func (l *lengthNumber) Message(message string) *lengthNumber {
+	l.message = message
+	return l
+}
+
+func (l *length) newLengthNumber(num int, message string) *lengthNumber {
+	return &lengthNumber{
+		length:  l,
+		number:  num,
+		message: message,
+	}
 }
 
 func (l *length) Rule() *Validation {
 	return l.Validation
 }
 
-func (l *length) Minimum(minimum int) *length {
-	l.minimum = minimum
-	return l
+func (l *length) Minimum(minimum int) *lengthNumber {
+	l.minimum = l.newLengthNumber(minimum, "is too short (minimum is %d characters)")
+	return l.minimum
 }
 
-func (l *length) Maximum(maximum int) *length {
-	l.maximum = maximum
-	return l
+func (l *length) Maximum(maximum int) *lengthNumber {
+	l.maximum = l.newLengthNumber(maximum, "is too long (maximum is %d characters)")
+	return l.maximum
 }
 
-func (l *length) Is(is int) *length {
-	l.is = is
-	return l
+func (l *length) Is(is int) *lengthNumber {
+	l.is = l.newLengthNumber(is, "is the wrong length (should be %d characters)")
+	return l.is
 }
 
 func (l *length) In(from, to int) *length {
