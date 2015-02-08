@@ -44,7 +44,7 @@ func (v *Validation) Format() *format {
 
 func (v *Validation) Numericality() *numericality {
 	if v.numericality == nil {
-		v.numericality = &numericality{Validation: v}
+		v.numericality = newNumericality(v)
 	}
 	return v.numericality
 }
@@ -176,6 +176,8 @@ func (w *with) Message(message string) *with {
 
 type numericality struct {
 	*Validation
+	numericality         bool
+	message              string
 	onlyInteger          bool
 	greaterThan          int
 	greaterThanOrEqualTo int
@@ -184,6 +186,18 @@ type numericality struct {
 	lessThanOrEqualTo    int
 	odd                  bool
 	even                 bool
+}
+
+func newNumericality(v *Validation) *numericality {
+	return &numericality{
+		Validation:   v,
+		numericality: true,
+		message:      "is not a number",
+	}
+}
+
+func (n *numericality) Rule() *Validation {
+	return n.Validation
 }
 
 func (n *numericality) OnlyInteger() *numericality {

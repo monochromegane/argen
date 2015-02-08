@@ -48,29 +48,31 @@ func (v Validator) IsValid(value interface{}) bool {
 		}
 	}
 	if v.rule.numericality != nil {
-		if !v.isNumericality(value) {
+		if ok, err := v.isNumericality(value); !ok {
 			result = false
-		}
-		if !v.greaterThan(value) {
-			result = false
-		}
-		if !v.greaterThanOrEqualTo(value) {
-			result = false
-		}
-		if !v.equalTo(value) {
-			result = false
-		}
-		if !v.lessThan(value) {
-			result = false
-		}
-		if !v.lessThanOrEqualTo(value) {
-			result = false
-		}
-		if !v.odd(value) {
-			result = false
-		}
-		if !v.even(value) {
-			result = false
+			errors = append(errors, err)
+		} else {
+			if !v.greaterThan(value) {
+				result = false
+			}
+			if !v.greaterThanOrEqualTo(value) {
+				result = false
+			}
+			if !v.equalTo(value) {
+				result = false
+			}
+			if !v.lessThan(value) {
+				result = false
+			}
+			if !v.lessThanOrEqualTo(value) {
+				result = false
+			}
+			if !v.odd(value) {
+				result = false
+			}
+			if !v.even(value) {
+				result = false
+			}
 		}
 	}
 	return result
@@ -147,21 +149,19 @@ func (v Validator) inLength(value interface{}) (bool, error) {
 	return true, nil
 }
 
-func (v Validator) isNumericality(value interface{}) bool {
-	result := false
+func (v Validator) isNumericality(value interface{}) (bool, error) {
+	numericality := v.rule.numericality
 	switch value.(type) {
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
-		result = true
+		return true, nil
 	case float32, float64:
-		if v.rule.numericality.onlyInteger {
-			result = false
+		if numericality.onlyInteger {
+			return false, fmt.Errorf("must be an integer")
 		} else {
-			result = true
+			return true, nil
 		}
-	default:
-		result = false
 	}
-	return result
+	return false, fmt.Errorf("is not a number")
 }
 
 func (v Validator) greaterThan(value interface{}) bool {
