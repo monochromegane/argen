@@ -67,11 +67,13 @@ func (v Validator) IsValid(value interface{}) bool {
 			if !v.lessThanOrEqualTo(value) {
 				result = false
 			}
-			if !v.odd(value) {
+			if ok, err := v.odd(value); !ok {
 				result = false
+				errors = append(errors, err)
 			}
-			if !v.even(value) {
+			if ok, err := v.even(value); !ok {
 				result = false
+				errors = append(errors, err)
 			}
 		}
 	}
@@ -155,13 +157,13 @@ func (v Validator) isNumericality(value interface{}) (bool, error) {
 	case int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64:
 		return true, nil
 	case float32, float64:
-		if numericality.onlyInteger {
-			return false, fmt.Errorf("must be an integer")
+		if numericality.onlyInteger.bool {
+			return false, fmt.Errorf(numericality.onlyInteger.message)
 		} else {
 			return true, nil
 		}
 	}
-	return false, fmt.Errorf("is not a number")
+	return false, fmt.Errorf(numericality.message)
 }
 
 func (v Validator) greaterThan(value interface{}) bool {
@@ -204,24 +206,21 @@ func (v Validator) lessThanOrEqualTo(value interface{}) bool {
 	return i <= v.rule.numericality.lessThanOrEqualTo
 }
 
-func (v Validator) odd(value interface{}) bool {
-	if !v.rule.numericality.odd {
-		return true
+func (v Validator) odd(value interface{}) (bool, error) {
+	odd := v.rule.numericality.odd
+	if !odd.bool {
+		return true, nil
 	}
-	i, ok := value.(int)
-	if !ok {
-		return false
+	i, _ := value.(int)
+	if i%2 == 0 {
+		return false, fmt.Errorf(odd.message)
 	}
-	return i%2 == 1
+	return true, nil
 }
 
-func (v Validator) even(value interface{}) bool {
-	if !v.rule.numericality.even {
-		return true
+func (v Validator) even(value interface{}) (bool, error) {
+	if ok, _ := v.odd(value); !ok {
+		return false, fmt.Errorf(v.rule.numericality.even.message)
 	}
-	i, ok := value.(int)
-	if !ok {
-		return false
-	}
-	return i%2 == 0
+	return true, nil
 }

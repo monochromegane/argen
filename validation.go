@@ -178,14 +178,37 @@ type numericality struct {
 	*Validation
 	numericality         bool
 	message              string
-	onlyInteger          bool
+	onlyInteger          *numericalityBool
 	greaterThan          int
 	greaterThanOrEqualTo int
 	equalTo              int
 	lessThan             int
 	lessThanOrEqualTo    int
-	odd                  bool
-	even                 bool
+	odd                  *numericalityBool
+	even                 *numericalityBool
+}
+
+func (n *numericality) newNumericalityBool(message string) *numericalityBool {
+	return &numericalityBool{
+		numericality: n,
+		bool:         true,
+		message:      message,
+	}
+}
+
+type numericalityBool struct {
+	*numericality
+	bool
+	message string
+}
+
+func (n *numericalityBool) Rule() *Validation {
+	return n.numericality.Validation
+}
+
+func (n *numericalityBool) Message(message string) *numericalityBool {
+	n.message = message
+	return n
 }
 
 func newNumericality(v *Validation) *numericality {
@@ -200,9 +223,9 @@ func (n *numericality) Rule() *Validation {
 	return n.Validation
 }
 
-func (n *numericality) OnlyInteger() *numericality {
-	n.onlyInteger = true
-	return n
+func (n *numericality) OnlyInteger() *numericalityBool {
+	n.onlyInteger = n.newNumericalityBool("must be an integer")
+	return n.onlyInteger
 }
 
 func (n *numericality) GreaterThan(num int) *numericality {
@@ -230,14 +253,14 @@ func (n *numericality) LessThanOrEqualTo(num int) *numericality {
 	return n
 }
 
-func (n *numericality) Odd() *numericality {
-	n.odd = true
-	return n
+func (n *numericality) Odd() *numericalityBool {
+	n.odd = n.newNumericalityBool("must be odd")
+	return n.odd
 }
 
-func (n *numericality) Even() *numericality {
-	n.even = true
-	return n
+func (n *numericality) Even() *numericalityBool {
+	n.even = n.newNumericalityBool("must be even")
+	return n.even
 }
 
 type inclusion struct {
