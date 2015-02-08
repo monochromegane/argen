@@ -52,20 +52,25 @@ func (v Validator) IsValid(value interface{}) bool {
 			result = false
 			errors = append(errors, err)
 		} else {
-			if !v.greaterThan(value) {
+			if ok, err := v.greaterThan(value); !ok {
 				result = false
+				errors = append(errors, err)
 			}
-			if !v.greaterThanOrEqualTo(value) {
+			if ok, err := v.greaterThanOrEqualTo(value); !ok {
 				result = false
+				errors = append(errors, err)
 			}
-			if !v.equalTo(value) {
+			if ok, err := v.equalTo(value); !ok {
 				result = false
+				errors = append(errors, err)
 			}
-			if !v.lessThan(value) {
+			if ok, err := v.lessThan(value); !ok {
 				result = false
+				errors = append(errors, err)
 			}
-			if !v.lessThanOrEqualTo(value) {
+			if ok, err := v.lessThanOrEqualTo(value); !ok {
 				result = false
+				errors = append(errors, err)
 			}
 			if ok, err := v.odd(value); !ok {
 				result = false
@@ -166,44 +171,49 @@ func (v Validator) isNumericality(value interface{}) (bool, error) {
 	return false, fmt.Errorf(numericality.message)
 }
 
-func (v Validator) greaterThan(value interface{}) bool {
-	i, ok := value.(int)
-	if !ok {
-		return false
+func (v Validator) greaterThan(value interface{}) (bool, error) {
+	greaterThan := v.rule.numericality.greaterThan
+	i, _ := value.(int)
+	if i <= greaterThan.number {
+		return false, fmt.Errorf(greaterThan.message, value)
 	}
-	return i > v.rule.numericality.greaterThan
+	return true, nil
 }
 
-func (v Validator) greaterThanOrEqualTo(value interface{}) bool {
-	i, ok := value.(int)
-	if !ok {
-		return false
+func (v Validator) greaterThanOrEqualTo(value interface{}) (bool, error) {
+	greaterThanOrEqualTo := v.rule.numericality.greaterThanOrEqualTo
+	i, _ := value.(int)
+	if i < greaterThanOrEqualTo.number {
+		return false, fmt.Errorf(greaterThanOrEqualTo.message, value)
 	}
-	return i >= v.rule.numericality.greaterThanOrEqualTo
+	return true, nil
 }
 
-func (v Validator) equalTo(value interface{}) bool {
-	i, ok := value.(int)
-	if !ok {
-		return false
+func (v Validator) equalTo(value interface{}) (bool, error) {
+	equalTo := v.rule.numericality.equalTo
+	i, _ := value.(int)
+	if i != equalTo.number {
+		return false, fmt.Errorf(equalTo.message, value)
 	}
-	return i == v.rule.numericality.equalTo
+	return true, nil
 }
 
-func (v Validator) lessThan(value interface{}) bool {
-	i, ok := value.(int)
-	if !ok {
-		return false
+func (v Validator) lessThan(value interface{}) (bool, error) {
+	lessThan := v.rule.numericality.lessThan
+	i, _ := value.(int)
+	if i >= lessThan.number {
+		return false, fmt.Errorf(lessThan.message, value)
 	}
-	return i < v.rule.numericality.lessThan
+	return true, nil
 }
 
-func (v Validator) lessThanOrEqualTo(value interface{}) bool {
-	i, ok := value.(int)
-	if !ok {
-		return false
+func (v Validator) lessThanOrEqualTo(value interface{}) (bool, error) {
+	lessThanOrEqualTo := v.rule.numericality.lessThanOrEqualTo
+	i, _ := value.(int)
+	if i > lessThanOrEqualTo.number {
+		return false, fmt.Errorf(lessThanOrEqualTo.message, value)
 	}
-	return i <= v.rule.numericality.lessThanOrEqualTo
+	return true, nil
 }
 
 func (v Validator) odd(value interface{}) (bool, error) {

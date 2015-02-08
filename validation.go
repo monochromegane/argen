@@ -179,11 +179,11 @@ type numericality struct {
 	numericality         bool
 	message              string
 	onlyInteger          *numericalityBool
-	greaterThan          int
-	greaterThanOrEqualTo int
-	equalTo              int
-	lessThan             int
-	lessThanOrEqualTo    int
+	greaterThan          *numericalityNumber
+	greaterThanOrEqualTo *numericalityNumber
+	equalTo              *numericalityNumber
+	lessThan             *numericalityNumber
+	lessThanOrEqualTo    *numericalityNumber
 	odd                  *numericalityBool
 	even                 *numericalityBool
 }
@@ -192,6 +192,14 @@ func (n *numericality) newNumericalityBool(message string) *numericalityBool {
 	return &numericalityBool{
 		numericality: n,
 		bool:         true,
+		message:      message,
+	}
+}
+
+func (n *numericality) newNumericalityNumber(num int, message string) *numericalityNumber {
+	return &numericalityNumber{
+		numericality: n,
+		number:       num,
 		message:      message,
 	}
 }
@@ -207,6 +215,21 @@ func (n *numericalityBool) Rule() *Validation {
 }
 
 func (n *numericalityBool) Message(message string) *numericalityBool {
+	n.message = message
+	return n
+}
+
+type numericalityNumber struct {
+	*numericality
+	number  int
+	message string
+}
+
+func (n *numericalityNumber) Rule() *Validation {
+	return n.numericality.Validation
+}
+
+func (n *numericalityNumber) Message(message string) *numericalityNumber {
 	n.message = message
 	return n
 }
@@ -228,29 +251,29 @@ func (n *numericality) OnlyInteger() *numericalityBool {
 	return n.onlyInteger
 }
 
-func (n *numericality) GreaterThan(num int) *numericality {
-	n.greaterThan = num
-	return n
+func (n *numericality) GreaterThan(num int) *numericalityNumber {
+	n.greaterThan = n.newNumericalityNumber(num, "must be greater than %d")
+	return n.greaterThan
 }
 
-func (n *numericality) GreaterThanOrEqualTo(num int) *numericality {
-	n.greaterThanOrEqualTo = num
-	return n
+func (n *numericality) GreaterThanOrEqualTo(num int) *numericalityNumber {
+	n.greaterThanOrEqualTo = n.newNumericalityNumber(num, "must be greater than or equal to %d")
+	return n.greaterThanOrEqualTo
 }
 
-func (n *numericality) EqualTo(num int) *numericality {
-	n.equalTo = num
-	return n
+func (n *numericality) EqualTo(num int) *numericalityNumber {
+	n.equalTo = n.newNumericalityNumber(num, "must be equal to %d")
+	return n.equalTo
 }
 
-func (n *numericality) LessThan(num int) *numericality {
-	n.lessThan = num
-	return n
+func (n *numericality) LessThan(num int) *numericalityNumber {
+	n.lessThan = n.newNumericalityNumber(num, "must be less than %d")
+	return n.lessThan
 }
 
-func (n *numericality) LessThanOrEqualTo(num int) *numericality {
-	n.lessThanOrEqualTo = num
-	return n
+func (n *numericality) LessThanOrEqualTo(num int) *numericalityNumber {
+	n.lessThanOrEqualTo = n.newNumericalityNumber(num, "must be less than or equal to %d")
+	return n.lessThanOrEqualTo
 }
 
 func (n *numericality) Odd() *numericalityBool {
