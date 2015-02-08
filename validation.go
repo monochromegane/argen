@@ -9,7 +9,7 @@ func MakeRule() *Validation {
 }
 
 type Validation struct {
-	presence     bool
+	presence     *presence
 	length       *length
 	format       *format
 	numericality *numericality
@@ -21,9 +21,11 @@ func (v *Validation) Rule() *Validation {
 	return v
 }
 
-func (v *Validation) Presence() *Validation {
-	v.presence = true
-	return v
+func (v *Validation) Presence() *presence {
+	if v.presence == nil {
+		v.presence = newPresence(v)
+	}
+	return v.presence
 }
 
 func (v *Validation) Length() *length {
@@ -57,6 +59,29 @@ func (v *Validation) Exclusion(collection ...string) *Validation {
 	exclusion := []string{}
 	v.exclusion = append(exclusion, collection...)
 	return v
+}
+
+type presence struct {
+	*Validation
+	presence bool
+	message  string
+}
+
+func newPresence(v *Validation) *presence {
+	return &presence{
+		Validation: v,
+		presence:   true,
+		message:    "can't be blank",
+	}
+}
+
+func (p *presence) Rule() *Validation {
+	return p.Validation
+}
+
+func (p *presence) Message(message string) *presence {
+	p.message = message
+	return p
 }
 
 type length struct {
@@ -109,9 +134,7 @@ func (l *length) Is(is int) *lengthNumber {
 }
 
 func (l *length) In(from, to int) *lengthNumber {
-	l.Minimum(from)
-	l.Maximum(to)
-	return l.maximum
+	return l.Minimum(from).Maximum(to)
 }
 
 func (l *length) WithIn(from, to int) *lengthNumber {

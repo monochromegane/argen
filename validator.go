@@ -17,9 +17,10 @@ func NewValidator(rule *Validation) Validator {
 func (v Validator) IsValid(value interface{}) bool {
 	result := true
 	errors := []error{}
-	if v.rule.presence {
-		if !v.isPersistent(value) {
+	if v.rule.presence != nil {
+		if ok, err := v.isPersistent(value); !ok {
 			result = false
+			errors = append(errors, err)
 		}
 	}
 	if v.rule.format != nil {
@@ -74,8 +75,11 @@ func (v Validator) IsValid(value interface{}) bool {
 	return result
 }
 
-func (v Validator) isPersistent(value interface{}) bool {
-	return IsZero(value)
+func (v Validator) isPersistent(value interface{}) (bool, error) {
+	if IsZero(value) {
+		return false, fmt.Errorf("%s", v.rule.presence.message)
+	}
+	return true, nil
 }
 
 func (v Validator) isFormatted(value interface{}) bool {
