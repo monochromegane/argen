@@ -5,11 +5,11 @@ var create = &Template{
 	Text: `
 type {{.Name}}Params {{.Name}}
 
-func (m {{.Name}}) Create(p {{.Name}}Params) (*{{.Name}}, error) {
+func (m {{.Name}}) Create(p {{.Name}}Params) (*{{.Name}}, *ar.Errors) {
         n := &{{.Name}}{ {{range .Fields}}
 		{{.Name}}: p.{{.Name}},{{end}}
         }
-        err := n.Save()
-        return n, err
+        _, errs := n.Save()
+        return n, errs
 }
 `}

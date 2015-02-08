@@ -3,16 +3,18 @@ package gen
 var validation = &Template{
 	Name: "Validation",
 	Text: `
-func (m {{.Name}}) IsValid() bool {
+func (m {{.Name}}) IsValid() (bool, *ar.Errors) {
         result := true
-        rules := map[*ar.Validation]interface{}{ {{range .Validation}}
-                m.{{.FuncName}}().Rule(): m.{{.FieldName}},{{end}}
+	errors := &ar.Errors{}
+        rules := map[string]*ar.Validation{ {{range .Validation}}
+		"{{.ColumnName}}": m.{{.FuncName}}().Rule(),{{end}}
         }
-        for rule, value := range rules {
-                if !ar.NewValidator(rule).IsValid(value) {
+        for name, rule:= range rules {
+                if ok, errs := ar.NewValidator(rule).IsValid(m.fieldByName(name)); !ok {
                         result = false
+			errors.Set(name, errs)
                 }
         }
-        return result
+        return result, errors
 }
 `}

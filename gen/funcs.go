@@ -170,3 +170,7 @@ func (v Validation) FuncName() string {
 func (v Validation) FieldName() string {
 	return strings.Replace(v.funcType.Name, "validates", "", 1)
 }
+
+func (v Validation) ColumnName() string {
+	return toSnakeCase(v.FieldName())
+}
