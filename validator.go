@@ -14,7 +14,7 @@ func NewValidator(rule *Validation) Validator {
 	return Validator{rule}
 }
 
-func (v Validator) IsValid(value interface{}) bool {
+func (v Validator) IsValid(value interface{}) (bool, []error) {
 	result := true
 	errors := []error{}
 	if v.rule.presence != nil {
@@ -82,7 +82,7 @@ func (v Validator) IsValid(value interface{}) bool {
 			}
 		}
 	}
-	return result
+	return result, errors
 }
 
 func (v Validator) isPersistent(value interface{}) (bool, error) {
