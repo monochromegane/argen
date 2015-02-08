@@ -143,16 +143,35 @@ func (l *length) WithIn(from, to int) *lengthNumber {
 
 type format struct {
 	*Validation
-	with string
+	with *with
+}
+
+type with struct {
+	*format
+	regexp  string
+	message string
 }
 
 func (f *format) Rule() *Validation {
 	return f.Validation
 }
 
-func (f *format) With(regexp string) *format {
-	f.with = regexp
-	return f
+func (f *format) With(regexp string) *with {
+	f.with = &with{
+		format:  f,
+		regexp:  regexp,
+		message: "is invalid",
+	}
+	return f.with
+}
+
+func (w *with) Rule() *Validation {
+	return w.format.Validation
+}
+
+func (w *with) Message(message string) *with {
+	w.message = message
+	return w
 }
 
 type numericality struct {

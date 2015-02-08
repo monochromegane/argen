@@ -24,8 +24,9 @@ func (v Validator) IsValid(value interface{}) bool {
 		}
 	}
 	if v.rule.format != nil {
-		if !v.isFormatted(value) {
+		if ok, err := v.isFormatted(value); !ok {
 			result = false
+			errors = append(errors, err)
 		}
 	}
 	if v.rule.length != nil {
@@ -82,16 +83,20 @@ func (v Validator) isPersistent(value interface{}) (bool, error) {
 	return true, nil
 }
 
-func (v Validator) isFormatted(value interface{}) bool {
-	if v.rule.format.with == "" {
-		return true
+func (v Validator) isFormatted(value interface{}) (bool, error) {
+	with := v.rule.format.with
+	if with.regexp == "" {
+		return true, nil
 	}
 	s, ok := value.(string)
 	if !ok {
-		return false
+		return false, fmt.Errorf(with.message)
 	}
-	match, _ := regexp.MatchString(v.rule.format.with, s)
-	return match
+	match, _ := regexp.MatchString(with.regexp, s)
+	if !match {
+		return false, fmt.Errorf(with.message)
+	}
+	return true, nil
 }
 
 func (v Validator) isMinimumLength(value interface{}) (bool, error) {
