@@ -15,6 +15,7 @@ type Select struct {
 	where   *condition
 	having  *condition
 	joins   []*join
+	explain bool
 }
 
 func (s *Select) Table(table string) *Select {
@@ -77,9 +78,18 @@ func (s *Select) InnerJoin(table string, cond string, args ...interface{}) *Sele
 	return s
 }
 
+func (s *Select) Explain() *Select {
+	s.explain = true
+	return s
+}
+
 func (s *Select) Build() (string, []interface{}) {
 	baseQuery := fmt.Sprintf("SELECT %s FROM %s", strings.Join(s.columns, ", "), s.table)
 	var binds []interface{}
+	var explain string
+	if s.explain {
+		explain = "EXPLAIN "
+	}
 	var joinQuery string
 	for _, j := range s.joins {
 		q, b := j.Build()
@@ -96,7 +106,8 @@ func (s *Select) Build() (string, []interface{}) {
 	binds = append(binds, limitBinds...)
 	binds = append(binds, havingBinds...)
 	binds = append(binds, offsetBinds...)
-	return baseQuery +
+	return explain +
+			baseQuery +
 			joinQuery +
 			whereQuery +
 			limitQuery +

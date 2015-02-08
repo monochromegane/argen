@@ -68,6 +68,11 @@ func (r *Relation) Having(cond string, args ...interface{}) *Relation {
 	return r
 }
 
+func (r *Relation) Explain() *Relation {
+	r.Select.Explain()
+	return r
+}
+
 func (r *Relation) Build() (string, []interface{}) {
 	return r.Select.Build()
 }

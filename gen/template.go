@@ -45,4 +45,5 @@ var templates = Templates{
 	belongsTo,
 	joins,
 	scope,
+	explain,
 }
