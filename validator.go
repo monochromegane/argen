@@ -40,8 +40,9 @@ func (v Validator) IsValid(value interface{}) bool {
 			result = false
 			errors = append(errors, err)
 		}
-		if !v.inLength(value) {
+		if ok, err := v.inLength(value); !ok {
 			result = false
+			errors = append(errors, err)
 		}
 	}
 	if v.rule.numericality != nil {
@@ -125,16 +126,16 @@ func (v Validator) isLength(value interface{}) (bool, error) {
 	return true, nil
 }
 
-func (v Validator) inLength(value interface{}) bool {
-	if v.rule.length.from == 0 && v.rule.length.to == 0 {
-		return true
-	}
-	s, ok := value.(string)
+func (v Validator) inLength(value interface{}) (bool, error) {
+	ok, err := v.isMinimumLength(value)
 	if !ok {
-		return false
+		return false, err
 	}
-	length := utf8.RuneCountInString(s)
-	return v.rule.length.from <= length && length <= v.rule.length.to
+	ok, err = v.isMaximumLength(value)
+	if !ok {
+		return false, err
+	}
+	return true, nil
 }
 
 func (v Validator) isNumericality(value interface{}) bool {

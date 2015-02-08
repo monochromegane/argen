@@ -61,10 +61,9 @@ func (v *Validation) Exclusion(collection ...string) *Validation {
 
 type length struct {
 	*Validation
-	minimum  *lengthNumber
-	maximum  *lengthNumber
-	is       *lengthNumber
-	from, to int
+	minimum *lengthNumber
+	maximum *lengthNumber
+	is      *lengthNumber
 }
 
 type lengthNumber struct {
@@ -109,13 +108,13 @@ func (l *length) Is(is int) *lengthNumber {
 	return l.is
 }
 
-func (l *length) In(from, to int) *length {
-	l.from = from
-	l.to = to
-	return l
+func (l *length) In(from, to int) *lengthNumber {
+	l.Minimum(from)
+	l.Maximum(to)
+	return l.maximum
 }
 
-func (l *length) WithIn(from, to int) *length {
+func (l *length) WithIn(from, to int) *lengthNumber {
 	return l.In(from, to)
 }
 
