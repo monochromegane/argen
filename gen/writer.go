@@ -2,9 +2,12 @@ package gen
 
 import (
 	"bufio"
+	"bytes"
 	"io"
 	"os"
 	"text/template"
+
+	"golang.org/x/tools/imports"
 )
 
 func writeToFile(file string, structs structs) error {
@@ -16,7 +19,27 @@ func writeToFile(file string, structs structs) error {
 	w := bufio.NewWriter(f)
 	defer w.Flush()
 
-	return write(w, structs)
+	b, err := writeWithFormat(file, structs)
+	if err != nil {
+		return err
+	}
+
+	w.Write(b)
+	return nil
+}
+
+func writeWithFormat(file string, structs structs) ([]byte, error) {
+	var b bytes.Buffer
+	w := bufio.NewWriter(&b)
+
+	write(w, structs)
+	w.Flush()
+
+	formatted, err := imports.Process(file, b.Bytes(), nil)
+	if err != nil {
+		return nil, err
+	}
+	return formatted, nil
 }
 
 func write(w io.Writer, structs structs) error {
