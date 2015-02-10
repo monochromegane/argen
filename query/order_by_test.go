@@ -9,9 +9,5 @@ func TestOrderBy(t *testing.T) {
 
 	q := o.build()
 
-	expectedQuery := " ORDER BY columnA ASC, columnB DESC"
-
-	if q != expectedQuery {
-		t.Errorf("query should be %s, but %s", expectedQuery, q)
-	}
+	assertQuery(t, " ORDER BY columnA ASC, columnB DESC", q)
 }

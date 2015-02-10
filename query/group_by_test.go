@@ -8,9 +8,5 @@ func TestGroupBy(t *testing.T) {
 
 	q := g.build()
 
-	expectedQuery := " GROUP BY columnA, columnB"
-
-	if q != expectedQuery {
-		t.Errorf("query should be %s, but %s", expectedQuery, q)
-	}
+	assertQuery(t, " GROUP BY columnA, columnB", q)
 }

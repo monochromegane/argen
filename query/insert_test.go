@@ -11,15 +11,6 @@ func testInsert(t *testing.T) {
 	})
 	q, b := insert.Build()
 
-	expectedQuery := "INSERT INTO table (columnA, columnB) VALUES (?, ?);"
-	expectedBinds := []interface{}{1}
-
-	if q != expectedQuery {
-		t.Errorf("query should be %s, but %s", expectedQuery, q)
-	}
-	for i, v := range b {
-		if v != expectedBinds[i] {
-			t.Errorf("binds should be %v, but %v", expectedBinds[i], v)
-		}
-	}
+	assertQuery(t, "INSERT INTO table (columnA, columnB) VALUES (?, ?);", q)
+	assertBinds(t, []interface{}{1}, b)
 }
