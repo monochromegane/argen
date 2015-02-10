@@ -73,8 +73,7 @@ func (s *Select) Having(cond string, args ...interface{}) *Select {
 }
 
 func (s *Select) InnerJoin(table string, cond string, args ...interface{}) *Select {
-	join := &join{}
-	s.joins = append(s.joins, join.InnerJoin(table, cond, args...))
+	s.joins = append(s.joins, innerJoin(table, cond, args...))
 	return s
 }
 
@@ -92,7 +91,7 @@ func (s *Select) Build() (string, []interface{}) {
 	}
 	var joinQuery string
 	for _, j := range s.joins {
-		q, b := j.Build()
+		q, b := j.build()
 		joinQuery += q
 		binds = append(binds, b...)
 	}

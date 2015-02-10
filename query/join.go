@@ -8,7 +8,8 @@ type join struct {
 	on    *condition
 }
 
-func (j *join) InnerJoin(table string, cond string, args ...interface{}) *join {
+func innerJoin(table string, cond string, args ...interface{}) *join {
+	j := &join{}
 	return j.setJoin("INNER", table, cond, args...)
 }
 
@@ -22,8 +23,8 @@ func (j *join) setJoin(typ string, table string, cond string, args ...interface{
 	return j
 }
 
-func (j *join) Build() (string, []interface{}) {
-	baseQuery := fmt.Sprintf(" %s JOIN %s ", j.typ, j.table)
+func (j *join) build() (string, []interface{}) {
+	baseQuery := fmt.Sprintf(" %s JOIN %s", j.typ, j.table)
 	onQuery, onBinds := j.on.build()
 	return baseQuery + onQuery, onBinds
 }
