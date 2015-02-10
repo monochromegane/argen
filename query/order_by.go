@@ -32,5 +32,5 @@ func (o *orderBy) build() string {
 	for _, o := range o.orders {
 		queries = append(queries, o.build())
 	}
-	return fmt.Sprintf("ORDER BY %s", strings.Join(queries, ", "))
+	return fmt.Sprintf(" ORDER BY %s", strings.Join(queries, ", "))
 }
