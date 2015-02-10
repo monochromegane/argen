@@ -31,5 +31,5 @@ func (i *Insert) Build() (string, []interface{}) {
 		binds = append(binds, v)
 	}
 
-	return fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s)", i.table, strings.Join(columns, ", "), strings.Join(ph, ", ")), binds
+	return fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s);", i.table, strings.Join(columns, ", "), strings.Join(ph, ", ")), binds
 }
