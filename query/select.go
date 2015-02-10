@@ -45,21 +45,33 @@ func (s *Select) And(cond string, args ...interface{}) *Select {
 }
 
 func (s *Select) OrderBy(column, order string) *Select {
+	if s.orderBy == nil {
+		s.orderBy = &orderBy{}
+	}
 	s.orderBy.addOrder(column, order)
 	return s
 }
 
-func (s *Select) Limit(limit int) *Select {
-	s.limit.setLimit(limit)
+func (s *Select) Limit(number int) *Select {
+	if s.limit == nil {
+		s.limit = &limit{}
+	}
+	s.limit.setLimit(number)
 	return s
 }
 
-func (s *Select) Offset(offset int) *Select {
-	s.offset.setOffset(offset)
+func (s *Select) Offset(number int) *Select {
+	if s.offset == nil {
+		s.offset = &offset{}
+	}
+	s.offset.setOffset(number)
 	return s
 }
 
 func (s *Select) GroupBy(group string, groups ...string) *Select {
+	if s.groupBy == nil {
+		s.groupBy = &groupBy{}
+	}
 	s.groupBy.setGroups(group, groups...)
 	return s
 }
@@ -83,36 +95,58 @@ func (s *Select) Explain() *Select {
 }
 
 func (s *Select) Build() (string, []interface{}) {
-	baseQuery := fmt.Sprintf("SELECT %s FROM %s", strings.Join(s.columns, ", "), s.table)
+
 	var binds []interface{}
-	var explain string
+
+	query := fmt.Sprintf("SELECT %s FROM %s", strings.Join(s.columns, ", "), s.table)
+
 	if s.explain {
-		explain = "EXPLAIN "
+		explain := "EXPLAIN "
+		query = explain + query
 	}
+
 	var joinQuery string
 	for _, j := range s.joins {
 		q, b := j.build()
 		joinQuery += q
 		binds = append(binds, b...)
 	}
-	whereQuery, whereBinds := s.where.build()
-	limitQuery, limitBinds := s.limit.build()
-	offsetQuery, offsetBinds := s.offset.build()
-	groupQuery := s.groupBy.build()
-	havingQuery, havingBinds := s.having.build()
-	orderQuery := s.orderBy.build()
-	binds = append(binds, whereBinds...)
-	binds = append(binds, limitBinds...)
-	binds = append(binds, havingBinds...)
-	binds = append(binds, offsetBinds...)
-	return explain +
-			baseQuery +
-			joinQuery +
-			whereQuery +
-			limitQuery +
-			offsetQuery +
-			groupQuery +
-			havingQuery +
-			orderQuery,
-		binds
+	query += joinQuery
+
+	if s.where != nil {
+		q, b := s.where.build()
+		query += q
+		binds = append(binds, b...)
+	}
+
+	if s.limit != nil {
+		q, b := s.limit.build()
+		query += q
+		binds = append(binds, b...)
+	}
+
+	if s.offset != nil {
+		q, b := s.offset.build()
+		query += q
+		binds = append(binds, b...)
+	}
+
+	if s.groupBy != nil {
+		q := s.groupBy.build()
+		query += q
+	}
+
+	if s.having != nil {
+		q, b := s.having.build()
+		query += q
+		binds = append(binds, b...)
+	}
+
+	if s.orderBy != nil {
+		q := s.orderBy.build()
+		query += q
+	}
+
+	return query + ";", binds
+
 }
