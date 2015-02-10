@@ -8,6 +8,6 @@ func (l *limit) setLimit(limit int) {
 	l.limit = limit
 }
 
-func (l *limit) build() (query string, binds []interface{}) {
+func (l *limit) build() (string, []interface{}) {
 	return " LIMIT ?", []interface{}{l.limit}
 }
