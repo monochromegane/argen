@@ -17,8 +17,8 @@ func (m *{{.Name}}) Save() (bool, *ar.Errors) {
 	}
 	errs := &ar.Errors{}
         if m.IsNewRecord() {
-                ins := &ar.Insert{}
-                q, b := ins.Table("{{.TableName}}").Params(map[string]interface{}{ {{range .Fields}}
+		ins := ar.NewInsert()
+                q, b := ins.Table("{{.TableName}}").Params(map[string]interface{}{ {{range .FieldsWithoutPrimaryKey}}
 			"{{.ColumnName}}": m.{{.Name}},{{end}}
                 }).Build()
 
@@ -28,7 +28,7 @@ func (m *{{.Name}}) Save() (bool, *ar.Errors) {
                 }
                 return true, nil
         }else{
-                upd := &ar.Update{}
+                upd := ar.NewUpdate()
                 q, b := upd.Table("{{.TableName}}").Params(map[string]interface{}{ {{range .Fields}}
 			"{{.ColumnName}}": m.{{.Name}},{{end}}
                 }).Where("{{.PrimaryKeyColumn}}", m.{{.PrimaryKeyField}}).Build()

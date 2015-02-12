@@ -49,6 +49,17 @@ func (s structType) primaryKey() (string, string, string) {
 	return "ID", "id", "int"
 }
 
+func (s structType) FieldsWithoutPrimaryKey() []field {
+	fields := []field{}
+	for _, f := range s.Fields {
+		if f.isPrimaryKey() {
+			continue
+		}
+		fields = append(fields, f)
+	}
+	return fields
+}
+
 func (s structType) HasOne() []HasOne {
 	var hasOne []HasOne
 	for _, f := range s.Funcs {

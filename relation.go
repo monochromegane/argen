@@ -24,6 +24,14 @@ func NewRelation() *Relation {
 	return &Relation{&query.Select{}}
 }
 
+func NewInsert() *Insert {
+	return &Insert{&query.Insert{}}
+}
+
+func NewUpdate() *Update {
+	return &Update{&query.Update{}}
+}
+
 func (r *Relation) Table(table string) *Relation {
 	r.Select.Table(table)
 	return r
