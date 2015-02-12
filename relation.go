@@ -20,6 +20,10 @@ type Update struct {
 	*query.Update
 }
 
+func NewRelation() *Relation {
+	return &Relation{&query.Select{}}
+}
+
 func (r *Relation) Table(table string) *Relation {
 	r.Select.Table(table)
 	return r
