@@ -27,6 +27,7 @@ var templates = Templates{
 	save,
 	sel,
 	find,
+	findBy,
 	relation,
 	query,
 	queryRow,

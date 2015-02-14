@@ -61,6 +61,7 @@ func Use(DB *sql.DB) {
 {{template "Relation" .}}
 {{template "Select" .}}
 {{template "Find" .}}
+{{template "FindBy" .}}
 {{template "First" .}}
 {{template "Last" .}}
 {{template "Where" .}}

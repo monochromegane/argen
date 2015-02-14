@@ -53,6 +53,18 @@ func TestFind(t *testing.T) {
 	assertEqualStruct(t, expect, u)
 }
 
+func TestFindBy(t *testing.T) {
+	u := &User{Name: "test"}
+	u.Save()
+	defer User{}.DeleteAll()
+
+	expect, _ := User{}.First()
+
+	u, err := User{}.FindBy("name", "test")
+	assertError(t, err)
+	assertEqualStruct(t, expect, u)
+}
+
 func TestFirst(t *testing.T) {
 	for _, name := range []string{"test1", "test2"} {
 		u := &User{Name: name}

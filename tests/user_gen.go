@@ -41,7 +41,15 @@ func (m User) Find(id int) (*User, error) {
 }
 
 func (r *UserRelation) Find(id int) (*User, error) {
-	return r.Where("id", id).QueryRow()
+	return r.FindBy("id", id)
+}
+
+func (m User) FindBy(cond string, args ...interface{}) (*User, error) {
+	return m.newRelation().FindBy(cond, args...)
+}
+
+func (r *UserRelation) FindBy(cond string, args ...interface{}) (*User, error) {
+	return r.Where(cond, args...).Limit(1).QueryRow()
 }
 
 func (m User) First() (*User, error) {

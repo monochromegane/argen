@@ -8,6 +8,6 @@ func (m {{.Name}}) Find(id {{.PrimaryKeyType}}) (*{{.Name}}, error) {
 }
 
 func (r *{{.Name}}Relation) Find(id {{.PrimaryKeyType}}) (*{{.Name}}, error) {
-        return r.Where("{{.PrimaryKeyColumn}}", id).QueryRow()
+        return r.FindBy("{{.PrimaryKeyColumn}}", id)
 }
 `}
