@@ -91,9 +91,17 @@ func (r *UserRelation) Order(column, order string) *UserRelation {
 	return r
 }
 
+func (m User) Limit(limit int) *UserRelation {
+	return m.newRelation().Limit(limit)
+}
+
 func (r *UserRelation) Limit(limit int) *UserRelation {
 	r.Relation.Limit(limit)
 	return r
+}
+
+func (m User) Offset(offset int) *UserRelation {
+	return m.newRelation().Offset(offset)
 }
 
 func (r *UserRelation) Offset(offset int) *UserRelation {

@@ -118,6 +118,24 @@ func TestOrder(t *testing.T) {
 	}
 }
 
+func TestLimitAndOffset(t *testing.T) {
+	for _, name := range []string{"test1", "test2", "test3"} {
+		u := &User{Name: name}
+		u.Save()
+	}
+	defer User{}.DeleteAll()
+
+	users, err := User{}.Limit(2).Offset(1).Order("name", "ASC").Query()
+
+	assertError(t, err)
+	expects := []string{"test2", "test3"}
+	for i, u := range users {
+		if u.Name != expects[i] {
+			t.Errorf("column value should be %v, but %v", expects[i], u.Name)
+		}
+	}
+}
+
 func assertEqualStruct(t *testing.T, expect, actual interface{}) {
 	if !reflect.DeepEqual(expect, actual) {
 		t.Errorf("struct should be equal to %v, but %v", expect, actual)

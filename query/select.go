@@ -119,12 +119,6 @@ func (s *Select) Build() (string, []interface{}) {
 		binds = append(binds, b...)
 	}
 
-	if s.offset != nil {
-		q, b := s.offset.build()
-		query += q
-		binds = append(binds, b...)
-	}
-
 	if s.groupBy != nil {
 		q := s.groupBy.build()
 		query += q
@@ -143,6 +137,19 @@ func (s *Select) Build() (string, []interface{}) {
 
 	if s.limit != nil {
 		q, b := s.limit.build()
+		query += q
+		binds = append(binds, b...)
+	}
+
+	if s.offset != nil {
+		if s.limit == nil {
+			limit := limit{}
+			limit.setLimit(-1)
+			q, b := limit.build()
+			query += q
+			binds = append(binds, b...)
+		}
+		q, b := s.offset.build()
 		query += q
 		binds = append(binds, b...)
 	}
