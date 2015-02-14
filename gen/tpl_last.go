@@ -3,7 +3,7 @@ package gen
 var last = &Template{
 	Name: "Last",
 	Text: `
-func (m *{{.Name}}) Last() (*{{.Name}}, error) {
+func (m {{.Name}}) Last() (*{{.Name}}, error) {
         return m.newRelation().Last()
 }
 

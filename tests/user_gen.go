@@ -149,7 +149,7 @@ func (r *UserRelation) First() (*User, error) {
 	return r.Order("id", "ASC").Limit(1).QueryRow()
 }
 
-func (m *User) Last() (*User, error) {
+func (m User) Last() (*User, error) {
 	return m.newRelation().Last()
 }
 
