@@ -162,9 +162,13 @@ func (m *User) Save() (bool, *ar.Errors) {
 			"name": m.Name,
 		}).Build()
 
-		if _, err := db.Exec(q, b...); err != nil {
+		if result, err := db.Exec(q, b...); err != nil {
 			errs.Add("base", err)
 			return false, errs
+		} else {
+			if lastId, err := result.LastInsertId(); err == nil {
+				m.Id = int(lastId)
+			}
 		}
 		return true, nil
 	} else {

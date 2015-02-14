@@ -22,10 +22,14 @@ func (m *{{.Name}}) Save() (bool, *ar.Errors) {
 			"{{.ColumnName}}": m.{{.Name}},{{end}}
                 }).Build()
 
-                if _, err := db.Exec(q, b...); err != nil {
+                if result, err := db.Exec(q, b...); err != nil {
 			errs.Add("base", err)
                         return false, errs
-                }
+                } else {
+			if lastId, err := result.LastInsertId(); err == nil {
+				m.Id = {{.PrimaryKeyType}}(lastId)
+			}
+		}
                 return true, nil
         }else{
                 upd := ar.NewUpdate()
