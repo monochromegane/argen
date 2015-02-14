@@ -100,6 +100,24 @@ func TestWhere(t *testing.T) {
 	assertEqualStruct(t, expect, u)
 }
 
+func TestOrder(t *testing.T) {
+	expects := []string{"test1", "test2"}
+	for _, name := range expects {
+		u := &User{Name: name}
+		u.Save()
+	}
+	defer User{}.DeleteAll()
+
+	users, err := User{}.Order("name", "ASC").Query()
+
+	assertError(t, err)
+	for i, u := range users {
+		if u.Name != expects[i] {
+			t.Errorf("column value should be %v, but %v", expects[i], u.Name)
+		}
+	}
+}
+
 func assertEqualStruct(t *testing.T, expect, actual interface{}) {
 	if !reflect.DeepEqual(expect, actual) {
 		t.Errorf("struct should be equal to %v, but %v", expect, actual)

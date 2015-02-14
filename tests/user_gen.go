@@ -82,6 +82,10 @@ func (r *UserRelation) And(cond string, args ...interface{}) *UserRelation {
 	return r
 }
 
+func (m User) Order(column, order string) *UserRelation {
+	return m.newRelation().Order(column, order)
+}
+
 func (r *UserRelation) Order(column, order string) *UserRelation {
 	r.Relation.OrderBy(column, order)
 	return r
