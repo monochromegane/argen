@@ -89,6 +89,17 @@ func TestLast(t *testing.T) {
 	assertEqualStruct(t, expect, u)
 }
 
+func TestWhere(t *testing.T) {
+	expect := &User{Name: "test"}
+	expect.Save()
+	defer User{}.DeleteAll()
+
+	u, err := User{}.Where("name", "test").And("id", 1).QueryRow()
+
+	assertError(t, err)
+	assertEqualStruct(t, expect, u)
+}
+
 func assertEqualStruct(t *testing.T, expect, actual interface{}) {
 	if !reflect.DeepEqual(expect, actual) {
 		t.Errorf("struct should be equal to %v, but %v", expect, actual)
