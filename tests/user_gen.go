@@ -28,7 +28,10 @@ func (m *User) newRelation() *UserRelation {
 }
 
 func (m User) Select(columns ...string) *UserRelation {
-	r := m.newRelation()
+	return m.newRelation().Select(columns...)
+}
+
+func (r *UserRelation) Select(columns ...string) *UserRelation {
 	r.Relation.Columns(columns...)
 	return r
 }
