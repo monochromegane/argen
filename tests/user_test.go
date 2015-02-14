@@ -136,6 +136,24 @@ func TestLimitAndOffset(t *testing.T) {
 	}
 }
 
+func TestGroupByAndHaving(t *testing.T) {
+	for _, name := range []string{"testA", "testB", "testB"} {
+		u := &User{Name: name}
+		u.Save()
+	}
+	defer User{}.DeleteAll()
+
+	users, err := User{}.Group("name").Having("count(name)", 2).Query()
+
+	assertError(t, err)
+	expects := []string{"testB"}
+	for i, u := range users {
+		if u.Name != expects[i] {
+			t.Errorf("column value should be %v, but %v", expects[i], u.Name)
+		}
+	}
+}
+
 func assertEqualStruct(t *testing.T, expect, actual interface{}) {
 	if !reflect.DeepEqual(expect, actual) {
 		t.Errorf("struct should be equal to %v, but %v", expect, actual)

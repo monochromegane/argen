@@ -109,6 +109,10 @@ func (r *UserRelation) Offset(offset int) *UserRelation {
 	return r
 }
 
+func (m User) Group(group string, groups ...string) *UserRelation {
+	return m.newRelation().Group(group, groups...)
+}
+
 func (r *UserRelation) Group(group string, groups ...string) *UserRelation {
 	r.Relation.GroupBy(group, groups...)
 	return r
