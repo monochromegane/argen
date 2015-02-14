@@ -119,12 +119,6 @@ func (s *Select) Build() (string, []interface{}) {
 		binds = append(binds, b...)
 	}
 
-	if s.limit != nil {
-		q, b := s.limit.build()
-		query += q
-		binds = append(binds, b...)
-	}
-
 	if s.offset != nil {
 		q, b := s.offset.build()
 		query += q
@@ -145,6 +139,12 @@ func (s *Select) Build() (string, []interface{}) {
 	if s.orderBy != nil {
 		q := s.orderBy.build()
 		query += q
+	}
+
+	if s.limit != nil {
+		q, b := s.limit.build()
+		query += q
+		binds = append(binds, b...)
 	}
 
 	return query + ";", binds
