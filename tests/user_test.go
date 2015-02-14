@@ -53,6 +53,34 @@ func TestFind(t *testing.T) {
 	assertEqualStruct(t, expect, u)
 }
 
+func TestFirst(t *testing.T) {
+	for _, name := range []string{"test1", "test2"} {
+		u := &User{Name: name}
+		u.Save()
+	}
+	defer User{}.DeleteAll()
+
+	expect, _ := User{}.Where("name", "test1").QueryRow()
+
+	u, err := User{}.First()
+	assertError(t, err)
+	assertEqualStruct(t, expect, u)
+}
+
+func TestLast(t *testing.T) {
+	for _, name := range []string{"test1", "test2"} {
+		u := &User{Name: name}
+		u.Save()
+	}
+	defer User{}.DeleteAll()
+
+	expect, _ := User{}.Where("name", "test2").QueryRow()
+
+	u, err := User{}.Last()
+	assertError(t, err)
+	assertEqualStruct(t, expect, u)
+}
+
 func assertEqualStruct(t *testing.T, expect, actual interface{}) {
 	if !reflect.DeepEqual(expect, actual) {
 		t.Errorf("struct should be equal to %v, but %v", expect, actual)
