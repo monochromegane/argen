@@ -76,6 +76,7 @@ func Use(DB *sql.DB) {
 {{template "Group" .}}
 {{template "Having" .}}
 {{template "Explain" .}}
+{{template "Delete" .}}
 {{template "Validation" .}}
 {{range .HasMany}}
 {{template "HasMany" .}}

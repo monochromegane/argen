@@ -46,4 +46,5 @@ var templates = Templates{
 	joins,
 	scope,
 	explain,
+	delete,
 }

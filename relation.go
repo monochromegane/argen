@@ -20,6 +20,10 @@ type Update struct {
 	*query.Update
 }
 
+type Delete struct {
+	*query.Delete
+}
+
 func NewRelation() *Relation {
 	return &Relation{&query.Select{}}
 }
@@ -30,6 +34,10 @@ func NewInsert() *Insert {
 
 func NewUpdate() *Update {
 	return &Update{&query.Update{}}
+}
+
+func NewDelete() *Delete {
+	return &Delete{&query.Delete{}}
 }
 
 func (r *Relation) Table(table string) *Relation {
