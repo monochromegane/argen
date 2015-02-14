@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"os"
+	"reflect"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -41,18 +42,20 @@ func TestSelect(t *testing.T) {
 }
 
 func TestFind(t *testing.T) {
-	expect := &User{Name: "test"}
-	expect.Save()
+	u := &User{Name: "test"}
+	u.Save()
 	defer User{}.DeleteAll()
+
+	expect, _ := User{}.First()
 
 	u, err := User{}.Find(1)
 	assertError(t, err)
+	assertEqualStruct(t, expect, u)
+}
 
-	if u.Id != 1 {
-		t.Errorf("column value should be equal to %v, but %v", 1, u.Id)
-	}
-	if expect.Name != u.Name {
-		t.Errorf("column value should be equal to %v, but %v", expect.Name, u.Name)
+func assertEqualStruct(t *testing.T, expect, actual interface{}) {
+	if !reflect.DeepEqual(expect, actual) {
+		t.Errorf("struct should be equal to %v, but %v", expect, actual)
 	}
 }
 
