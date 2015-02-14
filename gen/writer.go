@@ -58,14 +58,9 @@ func Use(DB *sql.DB) {
 	db = DB
 }
 {{range .}}
-{{template "FieldByName" .}}
+{{template "Relation" .}}
 {{template "Select" .}}
 {{template "Find" .}}
-{{template "Create" .}}
-{{template "Save" .}}
-{{template "Relation" .}}
-{{template "Query" .}}
-{{template "QueryRow" .}}
 {{template "First" .}}
 {{template "Last" .}}
 {{template "Where" .}}
@@ -76,8 +71,10 @@ func Use(DB *sql.DB) {
 {{template "Group" .}}
 {{template "Having" .}}
 {{template "Explain" .}}
-{{template "Delete" .}}
 {{template "Validation" .}}
+{{range .Scope}}
+{{template "Scope" .}}
+{{end}}
 {{range .HasMany}}
 {{template "HasMany" .}}
 {{end}}
@@ -90,9 +87,12 @@ func Use(DB *sql.DB) {
 {{range .Joins}}
 {{template "Joins" .}}
 {{end}}
-{{range .Scope}}
-{{template "Scope" .}}
-{{end}}
+{{template "Create" .}}
+{{template "Save" .}}
+{{template "Delete" .}}
+{{template "Query" .}}
+{{template "QueryRow" .}}
+{{template "FieldByName" .}}
 {{end}}
 ` + templates.ToString()
 
