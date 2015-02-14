@@ -40,6 +40,22 @@ func TestSelect(t *testing.T) {
 	}
 }
 
+func TestFind(t *testing.T) {
+	expect := &User{Name: "test"}
+	expect.Save()
+	defer User{}.DeleteAll()
+
+	u, err := User{}.Find(1)
+	assertError(t, err)
+
+	if u.Id != 1 {
+		t.Errorf("column value should be equal to %v, but %v", 1, u.Id)
+	}
+	if expect.Name != u.Name {
+		t.Errorf("column value should be equal to %v, but %v", expect.Name, u.Name)
+	}
+}
+
 func assertError(t *testing.T, err error) {
 	if err != nil {
 		t.Errorf("error should be nil, but %v", err)
