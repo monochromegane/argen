@@ -42,11 +42,9 @@ func TestSelect(t *testing.T) {
 }
 
 func TestFind(t *testing.T) {
-	u := &User{Name: "test"}
-	u.Save()
+	expect := &User{Name: "test"}
+	expect.Save()
 	defer User{}.DeleteAll()
-
-	expect, _ := User{}.First()
 
 	u, err := User{}.Find(1)
 	assertError(t, err)
@@ -54,11 +52,9 @@ func TestFind(t *testing.T) {
 }
 
 func TestFindBy(t *testing.T) {
-	u := &User{Name: "test"}
-	u.Save()
+	expect := &User{Name: "test"}
+	expect.Save()
 	defer User{}.DeleteAll()
-
-	expect, _ := User{}.First()
 
 	u, err := User{}.FindBy("name", "test")
 	assertError(t, err)
