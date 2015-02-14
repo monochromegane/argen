@@ -39,7 +39,11 @@ func (m User) Select(columns ...string) *UserRelation {
 }
 
 func (m User) Find(id int) (*User, error) {
-	return m.newRelation().Where("id", id).QueryRow()
+	return m.newRelation().Find(id)
+}
+
+func (r *UserRelation) Find(id int) (*User, error) {
+	return r.Where("id", id).QueryRow()
 }
 
 type UserParams User
@@ -129,7 +133,6 @@ func (r *UserRelation) Query() ([]*User, error) {
 
 func (r *UserRelation) QueryRow() (*User, error) {
 	q, b := r.Build()
-
 	row := &User{}
 	err := db.QueryRow(q, b...).Scan(row.fieldsByName(r.Relation.GetColumns())...)
 	if err != nil {

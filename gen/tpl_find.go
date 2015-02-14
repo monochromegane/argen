@@ -4,6 +4,10 @@ var find = &Template{
 	Name: "Find",
 	Text: `
 func (m {{.Name}}) Find(id {{.PrimaryKeyType}}) (*{{.Name}}, error) {
-        return m.newRelation().Where("{{.PrimaryKeyColumn}}", id).QueryRow()
+        return m.newRelation().Find(id)
+}
+
+func (r *{{.Name}}Relation) Find(id {{.PrimaryKeyType}}) (*{{.Name}}, error) {
+        return r.Where("{{.PrimaryKeyColumn}}", id).QueryRow()
 }
 `}
