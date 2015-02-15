@@ -10,7 +10,7 @@ import (
 	"golang.org/x/tools/imports"
 )
 
-func writeToFile(file string, structs structs) error {
+func writeToFile(file, template string, structs structs) error {
 	f, err := os.Create(file)
 	if err != nil {
 		return err
@@ -19,7 +19,7 @@ func writeToFile(file string, structs structs) error {
 	w := bufio.NewWriter(f)
 	defer w.Flush()
 
-	b, err := writeWithFormat(file, structs)
+	b, err := writeWithFormat(file, template, structs)
 	if err != nil {
 		return err
 	}
@@ -28,11 +28,11 @@ func writeToFile(file string, structs structs) error {
 	return nil
 }
 
-func writeWithFormat(file string, structs structs) ([]byte, error) {
+func writeWithFormat(file, template string, structs structs) ([]byte, error) {
 	var b bytes.Buffer
 	w := bufio.NewWriter(&b)
 
-	write(w, structs)
+	write(w, template, structs)
 	w.Flush()
 
 	formatted, err := imports.Process(file, b.Bytes(), nil)
@@ -42,63 +42,7 @@ func writeWithFormat(file string, structs structs) ([]byte, error) {
 	return formatted, nil
 }
 
-func write(w io.Writer, structs structs) error {
-
-	tplText := `package {{.Package}}
-
-import (
-	"database/sql"
-	"fmt"
-
-	"github.com/monochromegane/argen"
-	"github.com/monochromegane/goban"
-)
-
-var db *sql.DB
-
-func Use(DB *sql.DB) {
-	db = DB
-}
-{{range .}}
-{{template "Relation" .}}
-{{template "Select" .}}
-{{template "Find" .}}
-{{template "FindBy" .}}
-{{template "First" .}}
-{{template "Last" .}}
-{{template "Where" .}}
-{{template "And" .}}
-{{template "Order" .}}
-{{template "Limit" .}}
-{{template "Offset" .}}
-{{template "Group" .}}
-{{template "Having" .}}
-{{template "Explain" .}}
-{{template "Validation" .}}
-{{range .Scope}}
-{{template "Scope" .}}
-{{end}}
-{{range .HasMany}}
-{{template "HasMany" .}}
-{{end}}
-{{range .HasOne}}
-{{template "HasOne" .}}
-{{end}}
-{{range .BelongsTo}}
-{{template "BelongsTo" .}}
-{{end}}
-{{range .Joins}}
-{{template "Joins" .}}
-{{end}}
-{{template "Create" .}}
-{{template "Save" .}}
-{{template "Delete" .}}
-{{template "Query" .}}
-{{template "QueryRow" .}}
-{{template "FieldByName" .}}
-{{end}}
-` + templates.ToString()
-
+func write(w io.Writer, tplText string, structs structs) error {
 	t := template.New("t")
 	t.Funcs(template.FuncMap{})
 	tpl := template.Must(t.Parse(tplText))

@@ -21,7 +21,7 @@ func (t Template) toDefine() string {
 	return fmt.Sprintf("{{define \"%s\"}}%s{{end}}\n", t.Name, t.Text)
 }
 
-var templates = Templates{
+var structTemplates = Templates{
 	fieldByName,
 	create,
 	save,
@@ -49,3 +49,63 @@ var templates = Templates{
 	explain,
 	delete,
 }
+
+var structDb = `package {{.Package}}
+
+import "database/sql"
+
+var db *sql.DB
+
+func Use(DB *sql.DB) {
+	db = DB
+}
+`
+
+var structTemplate = `package {{.Package}}
+
+import (
+	"fmt"
+
+	"github.com/monochromegane/argen"
+	"github.com/monochromegane/goban"
+)
+
+{{range .}}
+{{template "Relation" .}}
+{{template "Select" .}}
+{{template "Find" .}}
+{{template "FindBy" .}}
+{{template "First" .}}
+{{template "Last" .}}
+{{template "Where" .}}
+{{template "And" .}}
+{{template "Order" .}}
+{{template "Limit" .}}
+{{template "Offset" .}}
+{{template "Group" .}}
+{{template "Having" .}}
+{{template "Explain" .}}
+{{template "Validation" .}}
+{{range .Scope}}
+{{template "Scope" .}}
+{{end}}
+{{range .HasMany}}
+{{template "HasMany" .}}
+{{end}}
+{{range .HasOne}}
+{{template "HasOne" .}}
+{{end}}
+{{range .BelongsTo}}
+{{template "BelongsTo" .}}
+{{end}}
+{{range .Joins}}
+{{template "Joins" .}}
+{{end}}
+{{template "Create" .}}
+{{template "Save" .}}
+{{template "Delete" .}}
+{{template "Query" .}}
+{{template "QueryRow" .}}
+{{template "FieldByName" .}}
+{{end}}
+` + structTemplates.ToString()

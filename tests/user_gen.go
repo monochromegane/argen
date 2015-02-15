@@ -1,18 +1,11 @@
 package tests
 
 import (
-	"database/sql"
 	"fmt"
 
 	"github.com/monochromegane/argen"
 	"github.com/monochromegane/goban"
 )
-
-var db *sql.DB
-
-func Use(DB *sql.DB) {
-	db = DB
-}
 
 type UserRelation struct {
 	src *User
