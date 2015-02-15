@@ -7,118 +7,119 @@ import (
 	"github.com/monochromegane/goban"
 )
 
-type UserRelation struct {
-	src *User
+type PostRelation struct {
+	src *Post
 	*ar.Relation
 }
 
-func (m *User) newRelation() *UserRelation {
+func (m *Post) newRelation() *PostRelation {
 	r := ar.NewRelation()
-	r.Table("users").Columns(
+	r.Table("posts").Columns(
 		"id",
+		"user_id",
 		"name",
 	)
 
-	return &UserRelation{m, r}
+	return &PostRelation{m, r}
 }
 
-func (m User) Select(columns ...string) *UserRelation {
+func (m Post) Select(columns ...string) *PostRelation {
 	return m.newRelation().Select(columns...)
 }
 
-func (r *UserRelation) Select(columns ...string) *UserRelation {
+func (r *PostRelation) Select(columns ...string) *PostRelation {
 	r.Relation.Columns(columns...)
 	return r
 }
 
-func (m User) Find(id int) (*User, error) {
+func (m Post) Find(id int) (*Post, error) {
 	return m.newRelation().Find(id)
 }
 
-func (r *UserRelation) Find(id int) (*User, error) {
+func (r *PostRelation) Find(id int) (*Post, error) {
 	return r.FindBy("id", id)
 }
 
-func (m User) FindBy(cond string, args ...interface{}) (*User, error) {
+func (m Post) FindBy(cond string, args ...interface{}) (*Post, error) {
 	return m.newRelation().FindBy(cond, args...)
 }
 
-func (r *UserRelation) FindBy(cond string, args ...interface{}) (*User, error) {
+func (r *PostRelation) FindBy(cond string, args ...interface{}) (*Post, error) {
 	return r.Where(cond, args...).Limit(1).QueryRow()
 }
 
-func (m User) First() (*User, error) {
+func (m Post) First() (*Post, error) {
 	return m.newRelation().First()
 }
 
-func (r *UserRelation) First() (*User, error) {
+func (r *PostRelation) First() (*Post, error) {
 	return r.Order("id", "ASC").Limit(1).QueryRow()
 }
 
-func (m User) Last() (*User, error) {
+func (m Post) Last() (*Post, error) {
 	return m.newRelation().Last()
 }
 
-func (r *UserRelation) Last() (*User, error) {
+func (r *PostRelation) Last() (*Post, error) {
 	return r.Order("id", "DESC").Limit(1).QueryRow()
 }
 
-func (m User) Where(cond string, args ...interface{}) *UserRelation {
+func (m Post) Where(cond string, args ...interface{}) *PostRelation {
 	return m.newRelation().Where(cond, args...)
 }
 
-func (r *UserRelation) Where(cond string, args ...interface{}) *UserRelation {
+func (r *PostRelation) Where(cond string, args ...interface{}) *PostRelation {
 	r.Relation.Where(cond, args...)
 	return r
 }
 
-func (r *UserRelation) And(cond string, args ...interface{}) *UserRelation {
+func (r *PostRelation) And(cond string, args ...interface{}) *PostRelation {
 	r.Relation.And(cond, args...)
 	return r
 }
 
-func (m User) Order(column, order string) *UserRelation {
+func (m Post) Order(column, order string) *PostRelation {
 	return m.newRelation().Order(column, order)
 }
 
-func (r *UserRelation) Order(column, order string) *UserRelation {
+func (r *PostRelation) Order(column, order string) *PostRelation {
 	r.Relation.OrderBy(column, order)
 	return r
 }
 
-func (m User) Limit(limit int) *UserRelation {
+func (m Post) Limit(limit int) *PostRelation {
 	return m.newRelation().Limit(limit)
 }
 
-func (r *UserRelation) Limit(limit int) *UserRelation {
+func (r *PostRelation) Limit(limit int) *PostRelation {
 	r.Relation.Limit(limit)
 	return r
 }
 
-func (m User) Offset(offset int) *UserRelation {
+func (m Post) Offset(offset int) *PostRelation {
 	return m.newRelation().Offset(offset)
 }
 
-func (r *UserRelation) Offset(offset int) *UserRelation {
+func (r *PostRelation) Offset(offset int) *PostRelation {
 	r.Relation.Offset(offset)
 	return r
 }
 
-func (m User) Group(group string, groups ...string) *UserRelation {
+func (m Post) Group(group string, groups ...string) *PostRelation {
 	return m.newRelation().Group(group, groups...)
 }
 
-func (r *UserRelation) Group(group string, groups ...string) *UserRelation {
+func (r *PostRelation) Group(group string, groups ...string) *PostRelation {
 	r.Relation.GroupBy(group, groups...)
 	return r
 }
 
-func (r *UserRelation) Having(cond string, args ...interface{}) *UserRelation {
+func (r *PostRelation) Having(cond string, args ...interface{}) *PostRelation {
 	r.Relation.Having(cond, args...)
 	return r
 }
 
-func (r *UserRelation) Explain() error {
+func (r *PostRelation) Explain() error {
 	r.Relation.Explain()
 	q, b := r.Build()
 	rows, err := db.Query(q, b...)
@@ -144,51 +145,57 @@ func (r *UserRelation) Explain() error {
 	return nil
 }
 
-func (m User) IsValid() (bool, *ar.Errors) {
+func (m Post) IsValid() (bool, *ar.Errors) {
 	result := true
 	errors := &ar.Errors{}
-	rules := map[string]*ar.Validation{}
+	rules := map[string]*ar.Validation{
+		"name": m.validatesName().Rule(),
+	}
 	for name, rule := range rules {
 		if ok, errs := ar.NewValidator(rule).IsValid(m.fieldValueByName(name)); !ok {
 			result = false
 			errors.SetErrors(name, errs)
 		}
 	}
-	customs := []ar.CustomValidator{}
+	customs := []ar.CustomValidator{
+		m.validateCustom,
+	}
 	for _, c := range customs {
 		c(errors)
 	}
 	return result, errors
 }
 
-type UserParams User
+type PostParams Post
 
-func (m User) Create(p UserParams) (*User, *ar.Errors) {
-	n := &User{
-		Id:   p.Id,
-		Name: p.Name,
+func (m Post) Create(p PostParams) (*Post, *ar.Errors) {
+	n := &Post{
+		Id:     p.Id,
+		UserId: p.UserId,
+		Name:   p.Name,
 	}
 	_, errs := n.Save()
 	return n, errs
 }
 
-func (m *User) IsNewRecord() bool {
+func (m *Post) IsNewRecord() bool {
 	return ar.IsZero(m.Id)
 }
 
-func (m *User) IsPersistent() bool {
+func (m *Post) IsPersistent() bool {
 	return !m.IsNewRecord()
 }
 
-func (m *User) Save() (bool, *ar.Errors) {
+func (m *Post) Save() (bool, *ar.Errors) {
 	if ok, errs := m.IsValid(); !ok {
 		return false, errs
 	}
 	errs := &ar.Errors{}
 	if m.IsNewRecord() {
 		ins := ar.NewInsert()
-		q, b := ins.Table("users").Params(map[string]interface{}{
-			"name": m.Name,
+		q, b := ins.Table("posts").Params(map[string]interface{}{
+			"user_id": m.UserId,
+			"name":    m.Name,
 		}).Build()
 
 		if result, err := db.Exec(q, b...); err != nil {
@@ -202,9 +209,10 @@ func (m *User) Save() (bool, *ar.Errors) {
 		return true, nil
 	} else {
 		upd := ar.NewUpdate()
-		q, b := upd.Table("users").Params(map[string]interface{}{
-			"id":   m.Id,
-			"name": m.Name,
+		q, b := upd.Table("posts").Params(map[string]interface{}{
+			"id":      m.Id,
+			"user_id": m.UserId,
+			"name":    m.Name,
 		}).Where("id", m.Id).Build()
 
 		if _, err := db.Exec(q, b...); err != nil {
@@ -215,10 +223,10 @@ func (m *User) Save() (bool, *ar.Errors) {
 	}
 }
 
-func (m User) DeleteAll() (bool, *ar.Errors) {
+func (m Post) DeleteAll() (bool, *ar.Errors) {
 	errs := &ar.Errors{}
 	del := ar.NewDelete()
-	del.Table("users")
+	del.Table("posts")
 	q, b := del.Build()
 	if _, err := db.Exec(q, b...); err != nil {
 		errs.AddError("base", err)
@@ -227,7 +235,7 @@ func (m User) DeleteAll() (bool, *ar.Errors) {
 	return true, nil
 }
 
-func (r *UserRelation) Query() ([]*User, error) {
+func (r *PostRelation) Query() ([]*Post, error) {
 	q, b := r.Build()
 	rows, err := db.Query(q, b...)
 	if err != nil {
@@ -235,9 +243,9 @@ func (r *UserRelation) Query() ([]*User, error) {
 	}
 	defer rows.Close()
 
-	results := []*User{}
+	results := []*Post{}
 	for rows.Next() {
-		row := &User{}
+		row := &Post{}
 		err := rows.Scan(row.fieldPtrsByName(r.Relation.GetColumns())...)
 		if err != nil {
 			return nil, err
@@ -247,9 +255,9 @@ func (r *UserRelation) Query() ([]*User, error) {
 	return results, nil
 }
 
-func (r *UserRelation) QueryRow() (*User, error) {
+func (r *PostRelation) QueryRow() (*Post, error) {
 	q, b := r.Build()
-	row := &User{}
+	row := &Post{}
 	err := db.QueryRow(q, b...).Scan(row.fieldPtrsByName(r.Relation.GetColumns())...)
 	if err != nil {
 		return nil, err
@@ -257,10 +265,12 @@ func (r *UserRelation) QueryRow() (*User, error) {
 	return row, nil
 }
 
-func (m *User) fieldValueByName(name string) interface{} {
+func (m *Post) fieldValueByName(name string) interface{} {
 	switch name {
 	case "id":
 		return m.Id
+	case "user_id":
+		return m.UserId
 	case "name":
 		return m.Name
 	default:
@@ -268,10 +278,12 @@ func (m *User) fieldValueByName(name string) interface{} {
 	}
 }
 
-func (m *User) fieldPtrByName(name string) interface{} {
+func (m *Post) fieldPtrByName(name string) interface{} {
 	switch name {
 	case "id":
 		return &m.Id
+	case "user_id":
+		return &m.UserId
 	case "name":
 		return &m.Name
 	default:
@@ -279,7 +291,7 @@ func (m *User) fieldPtrByName(name string) interface{} {
 	}
 }
 
-func (m *User) fieldPtrsByName(names []string) []interface{} {
+func (m *Post) fieldPtrsByName(names []string) []interface{} {
 	fields := []interface{}{}
 	for _, n := range names {
 		f := m.fieldPtrByName(n)

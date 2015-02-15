@@ -19,7 +19,10 @@ func TestMain(m *testing.M) {
 	defer db.Close()
 
 	Use(db)
-	sqlStmt := "create table users (id integer not null primary key, name text);"
+	sqlStmt := `
+	create table users (id integer not null primary key, name text);
+	create table posts (id integer not null primary key, user_id integer, name text);
+	`
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
 		log.Fatal(err, sqlStmt)
@@ -157,6 +160,15 @@ func TestGroupByAndHaving(t *testing.T) {
 func TestExplain(t *testing.T) {
 	err := User{}.Where("name", "test").Explain()
 	assertError(t, err)
+}
+
+func TestIsValid(t *testing.T) {
+	p := &Post{Name: "abc"}
+	_, errs := p.IsValid()
+
+	if len(errs.Messages["name"]) != 2 {
+		t.Errorf("errors count should be 2, but %d", len(errs.Messages["name"]))
+	}
 }
 
 func assertEqualStruct(t *testing.T, expect, actual interface{}) {

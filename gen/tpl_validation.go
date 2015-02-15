@@ -12,17 +12,14 @@ func (m {{.Name}}) IsValid() (bool, *ar.Errors) {
         for name, rule:= range rules {
                 if ok, errs := ar.NewValidator(rule).IsValid(m.fieldValueByName(name)); !ok {
                         result = false
-			errors.Set(name, errs)
+			errors.SetErrors(name, errs)
                 }
         }
 	customs := []ar.CustomValidator{ {{range .CustomValidation}}
 		m.{{.FuncName}},{{end}}
 	}
 	for _, c := range customs {
-		if ok, column, err := c(); !ok {
-			result = false
-			errors.Add(column, err)
-		}
+		c(errors)
 	}
         return result, errors
 }

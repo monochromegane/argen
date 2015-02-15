@@ -14,7 +14,7 @@ func NewValidator(rule *Validation) Validator {
 	return Validator{rule}
 }
 
-type CustomValidator func() (bool, string, error)
+type CustomValidator func(errors *Errors)
 
 func (v Validator) IsValid(value interface{}) (bool, []error) {
 	result := true

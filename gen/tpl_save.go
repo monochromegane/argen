@@ -23,7 +23,7 @@ func (m *{{.Name}}) Save() (bool, *ar.Errors) {
                 }).Build()
 
                 if result, err := db.Exec(q, b...); err != nil {
-			errs.Add("base", err)
+			errs.AddError("base", err)
                         return false, errs
                 } else {
 			if lastId, err := result.LastInsertId(); err == nil {
@@ -38,7 +38,7 @@ func (m *{{.Name}}) Save() (bool, *ar.Errors) {
                 }).Where("{{.PrimaryKeyColumn}}", m.{{.PrimaryKeyField}}).Build()
 
                 if _, err := db.Exec(q, b...); err != nil {
-			errs.Add("base", err)
+			errs.AddError("base", err)
                         return false, errs
                 }
                 return true, nil

@@ -9,7 +9,7 @@ func (m {{.Name}}) DeleteAll() (bool, *ar.Errors) {
         del.Table("{{.TableName}}")
         q, b := del.Build()
         if _, err := db.Exec(q, b...); err != nil {
-                errs.Add("base", err)
+                errs.AddError("base", err)
                 return false, errs
         }
         return true, nil
