@@ -2,8 +2,10 @@ package tests
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/monochromegane/argen"
+	"github.com/monochromegane/goban"
 )
 
 var db *sql.DB
@@ -123,9 +125,30 @@ func (r *UserRelation) Having(cond string, args ...interface{}) *UserRelation {
 	return r
 }
 
-func (r *UserRelation) Explain() *UserRelation {
+func (r *UserRelation) Explain() error {
 	r.Relation.Explain()
-	return r
+	q, b := r.Build()
+	rows, err := db.Query(q, b...)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	columns, _ := rows.Columns()
+	var values [][]string
+	for rows.Next() {
+		vals := make([]string, len(columns))
+		ptrs := make([]interface{}, len(columns))
+		for i, _ := range vals {
+			ptrs[i] = &vals[i]
+		}
+		rows.Scan(ptrs...)
+		values = append(values, vals)
+	}
+
+	fmt.Printf("%s %v\n", q, b)
+	goban.Render(columns, values)
+	return nil
 }
 
 func (m User) IsValid() (bool, *ar.Errors) {

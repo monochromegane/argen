@@ -3,8 +3,29 @@ package gen
 var explain = &Template{
 	Name: "Explain",
 	Text: `
-func (r *{{.Name}}Relation) Explain() *{{.Name}}Relation {
+func (r *{{.Name}}Relation) Explain() error {
         r.Relation.Explain()
-        return r
+        q, b := r.Build()
+        rows, err := db.Query(q, b...)
+        if err != nil {
+                return err
+        }
+        defer rows.Close()
+
+        columns, _ := rows.Columns()
+        var values [][]string
+        for rows.Next() {
+                vals := make([]string, len(columns))
+                ptrs := make([]interface{}, len(columns))
+                for i, _ := range vals {
+                        ptrs[i] = &vals[i]
+                }
+                rows.Scan(ptrs...)
+                values = append(values, vals)
+        }
+
+        fmt.Printf("%s %v\n", q, b)
+        goban.Render(columns, values)
+        return nil
 }
 `}

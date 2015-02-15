@@ -154,6 +154,11 @@ func TestGroupByAndHaving(t *testing.T) {
 	}
 }
 
+func TestExplain(t *testing.T) {
+	err := User{}.Where("name", "test").Explain()
+	assertError(t, err)
+}
+
 func assertEqualStruct(t *testing.T, expect, actual interface{}) {
 	if !reflect.DeepEqual(expect, actual) {
 		t.Errorf("struct should be equal to %v, but %v", expect, actual)

@@ -48,8 +48,10 @@ func write(w io.Writer, structs structs) error {
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/monochromegane/argen"
+	"github.com/monochromegane/goban"
 )
 
 var db *sql.DB
