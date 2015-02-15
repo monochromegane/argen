@@ -10,7 +10,7 @@ func (m {{.Name}}) IsValid() (bool, *ar.Errors) {
 		"{{.ColumnName}}": m.{{.FuncName}}().Rule(),{{end}}
         }
         for name, rule:= range rules {
-                if ok, errs := ar.NewValidator(rule).IsValid(m.fieldByName(name)); !ok {
+                if ok, errs := ar.NewValidator(rule).IsValid(m.fieldValueByName(name)); !ok {
                         result = false
 			errors.Set(name, errs)
                 }

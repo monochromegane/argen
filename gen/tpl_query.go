@@ -14,7 +14,7 @@ func (r *{{.Name}}Relation) Query() ([]*{{.Name}}, error) {
         results := []*{{.Name}}{}
         for rows.Next() {
                 row := &{{.Name}}{}
-		err := rows.Scan(row.fieldsByName(r.Relation.GetColumns())...)
+		err := rows.Scan(row.fieldPtrsByName(r.Relation.GetColumns())...)
                 if err != nil {
                         return nil, err
                 }

@@ -149,7 +149,7 @@ func (m User) IsValid() (bool, *ar.Errors) {
 	errors := &ar.Errors{}
 	rules := map[string]*ar.Validation{}
 	for name, rule := range rules {
-		if ok, errs := ar.NewValidator(rule).IsValid(m.fieldByName(name)); !ok {
+		if ok, errs := ar.NewValidator(rule).IsValid(m.fieldValueByName(name)); !ok {
 			result = false
 			errors.Set(name, errs)
 		}
@@ -241,7 +241,7 @@ func (r *UserRelation) Query() ([]*User, error) {
 	results := []*User{}
 	for rows.Next() {
 		row := &User{}
-		err := rows.Scan(row.fieldsByName(r.Relation.GetColumns())...)
+		err := rows.Scan(row.fieldPtrsByName(r.Relation.GetColumns())...)
 		if err != nil {
 			return nil, err
 		}
@@ -253,28 +253,39 @@ func (r *UserRelation) Query() ([]*User, error) {
 func (r *UserRelation) QueryRow() (*User, error) {
 	q, b := r.Build()
 	row := &User{}
-	err := db.QueryRow(q, b...).Scan(row.fieldsByName(r.Relation.GetColumns())...)
+	err := db.QueryRow(q, b...).Scan(row.fieldPtrsByName(r.Relation.GetColumns())...)
 	if err != nil {
 		return nil, err
 	}
 	return row, nil
 }
 
-func (m *User) fieldByName(name string) interface{} {
+func (m *User) fieldValueByName(name string) interface{} {
+	switch name {
+	case "id":
+		return m.Id
+	case "name":
+		return m.Name
+	default:
+		return ""
+	}
+}
+
+func (m *User) fieldPtrByName(name string) interface{} {
 	switch name {
 	case "id":
 		return &m.Id
 	case "name":
 		return &m.Name
 	default:
-		return ""
+		return nil
 	}
 }
 
-func (m *User) fieldsByName(names []string) []interface{} {
+func (m *User) fieldPtrsByName(names []string) []interface{} {
 	fields := []interface{}{}
 	for _, n := range names {
-		f := m.fieldByName(n)
+		f := m.fieldPtrByName(n)
 		fields = append(fields, f)
 	}
 	return fields
