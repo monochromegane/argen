@@ -175,10 +175,26 @@ func TestCreate(t *testing.T) {
 	u, errs := User{}.Create(UserParams{
 		Name: "TestCreate",
 	})
+	defer User{}.DeleteAll()
+
 	assertErrors(t, errs)
 
 	expect, _ := User{}.FindBy("name", "TestCreate")
 	assertEqualStruct(t, expect, u)
+}
+
+func TestIsNewRecordAndIsPresistent(t *testing.T) {
+	defer User{}.DeleteAll()
+
+	u := &User{Name: "test"}
+	if !u.IsNewRecord() {
+		t.Errorf("struct is new record, but isn't new record.")
+	}
+
+	u.Save()
+	if !u.IsPersistent() {
+		t.Errorf("struct is persistent, but isn't persistent.")
+	}
 }
 
 func assertEqualStruct(t *testing.T, expect, actual interface{}) {
