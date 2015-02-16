@@ -5,7 +5,8 @@ type Rule interface {
 }
 
 func MakeRule() *Validation {
-	return &Validation{}
+	v := &Validation{}
+	return v.OnSave()
 }
 
 type Validation struct {
@@ -15,6 +16,8 @@ type Validation struct {
 	numericality *numericality
 	inclusion    []string
 	exclusion    []string
+	onCreate     bool
+	onUpdate     bool
 }
 
 func (v *Validation) Rule() *Validation {
@@ -58,6 +61,24 @@ func (v *Validation) Inclusion(collection ...string) *Validation {
 func (v *Validation) Exclusion(collection ...string) *Validation {
 	exclusion := []string{}
 	v.exclusion = append(exclusion, collection...)
+	return v
+}
+
+func (v *Validation) OnCreate() *Validation {
+	v.onCreate = true
+	v.onUpdate = false
+	return v
+}
+
+func (v *Validation) OnUpdate() *Validation {
+	v.onCreate = false
+	v.onUpdate = true
+	return v
+}
+
+func (v *Validation) OnSave() *Validation {
+	v.onCreate = true
+	v.onUpdate = true
 	return v
 }
 
