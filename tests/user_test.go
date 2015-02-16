@@ -171,9 +171,25 @@ func TestIsValid(t *testing.T) {
 	}
 }
 
+func TestCreate(t *testing.T) {
+	u, errs := User{}.Create(UserParams{
+		Name: "TestCreate",
+	})
+	assertErrors(t, errs)
+
+	expect, _ := User{}.FindBy("name", "TestCreate")
+	assertEqualStruct(t, expect, u)
+}
+
 func assertEqualStruct(t *testing.T, expect, actual interface{}) {
 	if !reflect.DeepEqual(expect, actual) {
 		t.Errorf("struct should be equal to %v, but %v", expect, actual)
+	}
+}
+
+func assertErrors(t *testing.T, errs *ar.Errors) {
+	if errs != nil {
+		t.Errorf("errors should be nil, but %v", errs)
 	}
 }
 
