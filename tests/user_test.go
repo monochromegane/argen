@@ -197,6 +197,38 @@ func TestIsNewRecordAndIsPresistent(t *testing.T) {
 	}
 }
 
+func TestSaveWithInvalidData(t *testing.T) {
+	p := &Post{Name: "invalid"}
+	_, errs := p.Save()
+
+	if len(errs.Messages["name"]) != 2 {
+		t.Errorf("errors count should be 2, but %d", len(errs.Messages["name"]))
+	}
+}
+
+func TestSave(t *testing.T) {
+	defer User{}.DeleteAll()
+
+	u := &User{Name: "test"}
+
+	_, errs := u.Save()
+	assertErrors(t, errs)
+
+	if u.Id == 0 {
+		t.Errorf("Id should be setted after save, but isn't setted")
+	}
+
+	expect, _ := User{}.FindBy("name", "test")
+	assertEqualStruct(t, expect, u)
+
+	u.Name = "test2"
+	_, errs = u.Save()
+	assertErrors(t, errs)
+
+	expect, _ = User{}.Find(u.Id)
+	assertEqualStruct(t, expect, u)
+}
+
 func assertEqualStruct(t *testing.T, expect, actual interface{}) {
 	if !reflect.DeepEqual(expect, actual) {
 		t.Errorf("struct should be equal to %v, but %v", expect, actual)
