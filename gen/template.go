@@ -48,6 +48,7 @@ var structTemplates = Templates{
 	scope,
 	explain,
 	delete,
+	update,
 }
 
 var structDb = `package {{.Package}}
@@ -103,6 +104,7 @@ import (
 {{end}}
 {{template "Create" .}}
 {{template "Save" .}}
+{{template "Update" .}}
 {{template "Delete" .}}
 {{template "Query" .}}
 {{template "QueryRow" .}}

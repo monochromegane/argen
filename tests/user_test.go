@@ -229,6 +229,38 @@ func TestSave(t *testing.T) {
 	assertEqualStruct(t, expect, u)
 }
 
+func TestUpdate(t *testing.T) {
+	defer User{}.DeleteAll()
+
+	u := &User{Name: "test"}
+	_, errs := u.Save()
+
+	expect := UserParams{Name: "test2"}
+	_, errs = u.Update(expect)
+	assertErrors(t, errs)
+
+	actual, _ := User{}.Find(u.Id)
+	if expect.Name != actual.Name {
+		t.Errorf("column value should be equal to %v, but %v", expect.Name, actual.Name)
+	}
+}
+
+func TestUpdateColumns(t *testing.T) {
+	defer User{}.DeleteAll()
+
+	u := &User{Name: "test"}
+	_, errs := u.Save()
+
+	expect := UserParams{Name: "test2"}
+	_, errs = u.UpdateColumns(expect)
+	assertErrors(t, errs)
+
+	actual, _ := User{}.Find(u.Id)
+	if expect.Name != actual.Name {
+		t.Errorf("column value should be equal to %v, but %v", expect.Name, actual.Name)
+	}
+}
+
 func assertEqualStruct(t *testing.T, expect, actual interface{}) {
 	if !reflect.DeepEqual(expect, actual) {
 		t.Errorf("struct should be equal to %v, but %v", expect, actual)

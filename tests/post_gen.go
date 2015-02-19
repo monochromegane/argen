@@ -208,19 +208,56 @@ func (m *Post) Save() (bool, *ar.Errors) {
 		}
 		return true, nil
 	} else {
-		upd := ar.NewUpdate()
-		q, b := upd.Table("posts").Params(map[string]interface{}{
+		params := map[string]interface{}{
 			"id":      m.Id,
 			"user_id": m.UserId,
 			"name":    m.Name,
-		}).Where("id", m.Id).Build()
-
-		if _, err := db.Exec(q, b...); err != nil {
+		}
+		if _, err := m.updateColumnsByMap(params); err != nil {
 			errs.AddError("base", err)
 			return false, errs
 		}
 		return true, nil
 	}
+}
+
+func (m *Post) Update(p PostParams) (bool, *ar.Errors) {
+	if ok, errs := m.IsValid(); !ok {
+		return false, errs
+	}
+	return m.UpdateColumns(p)
+}
+
+func (m *Post) UpdateColumns(p PostParams) (bool, *ar.Errors) {
+	errs := &ar.Errors{}
+	params := map[string]interface{}{}
+
+	if !ar.IsZero(p.Id) && m.Id != p.Id {
+		params["id"] = p.Id
+	}
+
+	if !ar.IsZero(p.UserId) && m.UserId != p.UserId {
+		params["user_id"] = p.UserId
+	}
+
+	if !ar.IsZero(p.Name) && m.Name != p.Name {
+		params["name"] = p.Name
+	}
+
+	if _, err := m.updateColumnsByMap(params); err != nil {
+		errs.AddError("base", err)
+		return false, errs
+	}
+	return true, nil
+}
+
+func (m *Post) updateColumnsByMap(params map[string]interface{}) (bool, error) {
+	upd := ar.NewUpdate()
+	q, b := upd.Table("posts").Params(params).Where("id", m.Id).Build()
+	if _, err := db.Exec(q, b...); err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 func (m Post) DeleteAll() (bool, *ar.Errors) {

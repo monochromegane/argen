@@ -32,13 +32,11 @@ func (m *{{.Name}}) Save() (bool, *ar.Errors) {
 		}
                 return true, nil
         }else{
-                upd := ar.NewUpdate()
-                q, b := upd.Table("{{.TableName}}").Params(map[string]interface{}{ {{range .Fields}}
+                params := map[string]interface{}{ {{range .Fields}}
 			"{{.ColumnName}}": m.{{.Name}},{{end}}
-                }).Where("{{.PrimaryKeyColumn}}", m.{{.PrimaryKeyField}}).Build()
-
-                if _, err := db.Exec(q, b...); err != nil {
-			errs.AddError("base", err)
+                }
+                if _, err := m.updateColumnsByMap(params); err != nil {
+                        errs.AddError("base", err)
                         return false, errs
                 }
                 return true, nil
