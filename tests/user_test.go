@@ -166,8 +166,8 @@ func TestIsValid(t *testing.T) {
 	p := &Post{Name: "abc"}
 	_, errs := p.IsValid()
 
-	if len(errs.Messages["name"]) != 2 {
-		t.Errorf("errors count should be 2, but %d", len(errs.Messages["name"]))
+	if len(errs.Messages["name"]) != 1 {
+		t.Errorf("errors count should be 1, but %d", len(errs.Messages["name"]))
 	}
 }
 
@@ -198,12 +198,28 @@ func TestIsNewRecordAndIsPresistent(t *testing.T) {
 }
 
 func TestSaveWithInvalidData(t *testing.T) {
+	defer Post{}.DeleteAll()
+
+	// OnCreate
 	p := &Post{Name: "invalid"}
 	_, errs := p.Save()
 
-	if len(errs.Messages["name"]) != 2 {
-		t.Errorf("errors count should be 2, but %d", len(errs.Messages["name"]))
+	if len(errs.Messages["name"]) != 1 {
+		t.Errorf("errors count should be 1, but %d", len(errs.Messages["name"]))
 	}
+
+	p.Name = "name"
+	_, errs = p.Save()
+	assertErrors(t, errs)
+
+	// OnUpdate
+	p.Name = "invalid2"
+	_, errs = p.Save()
+
+	if len(errs.Messages["name"]) != 1 {
+		t.Errorf("errors count should be 1, but %d", len(errs.Messages["name"]))
+	}
+
 }
 
 func TestSave(t *testing.T) {

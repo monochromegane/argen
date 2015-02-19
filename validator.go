@@ -6,6 +6,19 @@ import (
 	"unicode/utf8"
 )
 
+type On struct {
+	create bool
+	update bool
+}
+
+func OnCreate() On {
+	return On{create: true}
+}
+
+func OnUpdate() On {
+	return On{update: true}
+}
+
 type Validator struct {
 	rule *Validation
 }
@@ -15,11 +28,29 @@ func NewValidator(rule *Validation) Validator {
 }
 
 func (v Validator) Custom() CustomValidation {
+	if v.rule == nil {
+		return func(errors *Errors) {}
+	}
 	return v.rule.custom
 }
 
+func (v Validator) On(on On) Validator {
+	if on.create && !v.rule.onCreate {
+		v.rule = nil
+	}
+	if on.update && !v.rule.onUpdate {
+		v.rule = nil
+	}
+	return v
+}
+
 func (v Validator) IsValid(value interface{}) (bool, []error) {
+
 	result := true
+	if v.rule == nil {
+		return result, nil
+	}
+
 	errors := []error{}
 	if v.rule.presence != nil {
 		if ok, err := v.isPersistent(value); !ok {

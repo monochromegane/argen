@@ -148,11 +148,17 @@ func (r *PostRelation) Explain() error {
 func (m Post) IsValid() (bool, *ar.Errors) {
 	result := true
 	errors := &ar.Errors{}
+	var on ar.On
+	if m.IsNewRecord() {
+		on = ar.OnCreate()
+	} else {
+		on = ar.OnUpdate()
+	}
 	rules := map[string]*ar.Validation{
 		"name": m.validatesName().Rule(),
 	}
 	for name, rule := range rules {
-		if ok, errs := ar.NewValidator(rule).IsValid(m.fieldValueByName(name)); !ok {
+		if ok, errs := ar.NewValidator(rule).On(on).IsValid(m.fieldValueByName(name)); !ok {
 			result = false
 			errors.SetErrors(name, errs)
 		}
@@ -161,8 +167,11 @@ func (m Post) IsValid() (bool, *ar.Errors) {
 		m.validateCustom().Rule(),
 	}
 	for _, rule := range customs {
-		custom := ar.NewValidator(rule).Custom()
+		custom := ar.NewValidator(rule).On(on).Custom()
 		custom(errors)
+	}
+	if len(errors.Messages) > 0 {
+		result = false
 	}
 	return result, errors
 }

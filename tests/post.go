@@ -11,7 +11,7 @@ type Post struct {
 }
 
 func (p Post) validatesName() ar.Rule {
-	return ar.MakeRule().Format().With("/name/")
+	return ar.MakeRule().Format().With("name").OnCreate()
 }
 
 func (p Post) validateCustom() ar.Rule {
@@ -19,5 +19,5 @@ func (p Post) validateCustom() ar.Rule {
 		if p.Name != "name" {
 			errors.Add("name", "must be name")
 		}
-	})
+	}).OnUpdate()
 }
