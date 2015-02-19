@@ -9,6 +9,13 @@ func MakeRule() *Validation {
 	return v.OnSave()
 }
 
+func CustomRule(c CustomValidation) *Validation {
+	v := &Validation{}
+	return v.CustomRule(c).OnSave()
+}
+
+type CustomValidation func(errors *Errors)
+
 type Validation struct {
 	presence     *presence
 	length       *length
@@ -16,11 +23,17 @@ type Validation struct {
 	numericality *numericality
 	inclusion    []string
 	exclusion    []string
+	custom       CustomValidation
 	onCreate     bool
 	onUpdate     bool
 }
 
 func (v *Validation) Rule() *Validation {
+	return v
+}
+
+func (v *Validation) CustomRule(c CustomValidation) *Validation {
+	v.custom = c
 	return v
 }
 

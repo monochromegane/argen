@@ -157,11 +157,12 @@ func (m Post) IsValid() (bool, *ar.Errors) {
 			errors.SetErrors(name, errs)
 		}
 	}
-	customs := []ar.CustomValidator{
-		m.validateCustom,
+	customs := []*ar.Validation{
+		m.validateCustom().Rule(),
 	}
-	for _, c := range customs {
-		c(errors)
+	for _, rule := range customs {
+		custom := ar.NewValidator(rule).Custom()
+		custom(errors)
 	}
 	return result, errors
 }

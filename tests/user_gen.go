@@ -154,9 +154,10 @@ func (m User) IsValid() (bool, *ar.Errors) {
 			errors.SetErrors(name, errs)
 		}
 	}
-	customs := []ar.CustomValidator{}
-	for _, c := range customs {
-		c(errors)
+	customs := []*ar.Validation{}
+	for _, rule := range customs {
+		custom := ar.NewValidator(rule).Custom()
+		custom(errors)
 	}
 	return result, errors
 }

@@ -14,8 +14,10 @@ func (p Post) validatesName() ar.Rule {
 	return ar.MakeRule().Format().With("/name/")
 }
 
-func (p Post) validateCustom(errors *ar.Errors) {
-	if p.Name != "name" {
-		errors.Add("name", "must be name")
-	}
+func (p Post) validateCustom() ar.Rule {
+	return ar.CustomRule(func(errors *ar.Errors) {
+		if p.Name != "name" {
+			errors.Add("name", "must be name")
+		}
+	})
 }

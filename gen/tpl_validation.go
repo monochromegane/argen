@@ -15,11 +15,12 @@ func (m {{.Name}}) IsValid() (bool, *ar.Errors) {
 			errors.SetErrors(name, errs)
                 }
         }
-	customs := []ar.CustomValidator{ {{range .CustomValidation}}
-		m.{{.FuncName}},{{end}}
+	customs := []*ar.Validation{ {{range .CustomValidation}}
+		m.{{.FuncName}}().Rule(),{{end}}
 	}
-	for _, c := range customs {
-		c(errors)
+	for _, rule := range customs {
+		custom := ar.NewValidator(rule).Custom()
+		custom(errors)
 	}
         return result, errors
 }
