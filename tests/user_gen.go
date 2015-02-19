@@ -190,9 +190,11 @@ func (m *User) IsPersistent() bool {
 	return !m.IsNewRecord()
 }
 
-func (m *User) Save() (bool, *ar.Errors) {
-	if ok, errs := m.IsValid(); !ok {
-		return false, errs
+func (m *User) Save(validate ...bool) (bool, *ar.Errors) {
+	if len(validate) == 0 || len(validate) > 0 && validate[0] {
+		if ok, errs := m.IsValid(); !ok {
+			return false, errs
+		}
 	}
 	errs := &ar.Errors{}
 	if m.IsNewRecord() {
@@ -211,11 +213,12 @@ func (m *User) Save() (bool, *ar.Errors) {
 		}
 		return true, nil
 	} else {
-		params := map[string]interface{}{
+		upd := ar.NewUpdate()
+		q, b := upd.Table("users").Params(map[string]interface{}{
 			"id":   m.Id,
 			"name": m.Name,
-		}
-		if _, err := m.updateColumnsByMap(params); err != nil {
+		}).Where("id", m.Id).Build()
+		if _, err := db.Exec(q, b...); err != nil {
 			errs.AddError("base", err)
 			return false, errs
 		}
@@ -224,38 +227,25 @@ func (m *User) Save() (bool, *ar.Errors) {
 }
 
 func (m *User) Update(p UserParams) (bool, *ar.Errors) {
-	if ok, errs := m.IsValid(); !ok {
-		return false, errs
+
+	if !ar.IsZero(p.Id) {
+		m.Id = p.Id
 	}
-	return m.UpdateColumns(p)
+	if !ar.IsZero(p.Name) {
+		m.Name = p.Name
+	}
+	return m.Save()
 }
 
 func (m *User) UpdateColumns(p UserParams) (bool, *ar.Errors) {
-	errs := &ar.Errors{}
-	params := map[string]interface{}{}
 
-	if !ar.IsZero(p.Id) && m.Id != p.Id {
-		params["id"] = p.Id
+	if !ar.IsZero(p.Id) {
+		m.Id = p.Id
 	}
-
-	if !ar.IsZero(p.Name) && m.Name != p.Name {
-		params["name"] = p.Name
+	if !ar.IsZero(p.Name) {
+		m.Name = p.Name
 	}
-
-	if _, err := m.updateColumnsByMap(params); err != nil {
-		errs.AddError("base", err)
-		return false, errs
-	}
-	return true, nil
-}
-
-func (m *User) updateColumnsByMap(params map[string]interface{}) (bool, error) {
-	upd := ar.NewUpdate()
-	q, b := upd.Table("users").Params(params).Where("id", m.Id).Build()
-	if _, err := db.Exec(q, b...); err != nil {
-		return false, err
-	}
-	return true, nil
+	return m.Save(false)
 }
 
 func (m User) DeleteAll() (bool, *ar.Errors) {

@@ -11,9 +11,11 @@ func (m *{{.Name}}) IsPersistent() bool {
         return !m.IsNewRecord()
 }
 
-func (m *{{.Name}}) Save() (bool, *ar.Errors) {
-	if ok, errs := m.IsValid(); !ok {
-		return false, errs
+func (m *{{.Name}}) Save(validate ...bool) (bool, *ar.Errors) {
+	if len(validate) == 0 || len(validate) > 0 && validate[0] {
+		if ok, errs := m.IsValid(); !ok {
+			return false, errs
+		}
 	}
 	errs := &ar.Errors{}
         if m.IsNewRecord() {
@@ -32,13 +34,14 @@ func (m *{{.Name}}) Save() (bool, *ar.Errors) {
 		}
                 return true, nil
         }else{
-                params := map[string]interface{}{ {{range .Fields}}
-			"{{.ColumnName}}": m.{{.Name}},{{end}}
-                }
-                if _, err := m.updateColumnsByMap(params); err != nil {
-                        errs.AddError("base", err)
-                        return false, errs
-                }
+		upd := ar.NewUpdate()
+		q, b := upd.Table("{{.TableName}}").Params(map[string]interface{}{ {{range .Fields}}
+		"{{.ColumnName}}": m.{{.Name}},{{end}}
+		}).Where("{{.PrimaryKeyColumn}}", m.{{.PrimaryKeyField}}).Build()
+		if _, err := db.Exec(q, b...); err != nil {
+			errs.AddError("base", err)
+			return false, errs
+		}
                 return true, nil
         }
 }
