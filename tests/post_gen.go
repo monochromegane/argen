@@ -262,6 +262,21 @@ func (m *Post) UpdateColumns(p PostParams) (bool, *ar.Errors) {
 	return m.Save(false)
 }
 
+func (m *Post) Destroy() (bool, *ar.Errors) {
+	return m.Delete()
+}
+
+func (m *Post) Delete() (bool, *ar.Errors) {
+	errs := &ar.Errors{}
+	del := ar.NewDelete()
+	q, b := del.Table("posts").Where("id", m.Id).Build()
+	if _, err := db.Exec(q, b...); err != nil {
+		errs.AddError("base", err)
+		return false, errs
+	}
+	return true, nil
+}
+
 func (m Post) DeleteAll() (bool, *ar.Errors) {
 	errs := &ar.Errors{}
 	del := ar.NewDelete()

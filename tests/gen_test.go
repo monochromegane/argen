@@ -277,6 +277,20 @@ func TestUpdateColumns(t *testing.T) {
 	}
 }
 
+func TestDelete(t *testing.T) {
+	defer User{}.DeleteAll()
+
+	u, _ := User{}.Create(UserParams{Name: "test1"})
+
+	_, errs := u.Delete()
+	assertErrors(t, errs)
+
+	actual, _ := User{}.Find(u.Id)
+	if actual != nil {
+		t.Errorf("record should be deleted, but isn't deleted %v", actual)
+	}
+}
+
 func assertEqualStruct(t *testing.T, expect, actual interface{}) {
 	if !reflect.DeepEqual(expect, actual) {
 		t.Errorf("struct should be equal to %v, but %v", expect, actual)

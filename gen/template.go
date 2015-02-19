@@ -48,6 +48,7 @@ var structTemplates = Templates{
 	scope,
 	explain,
 	delete,
+	destroy,
 	update,
 }
 
@@ -105,6 +106,7 @@ import (
 {{template "Create" .}}
 {{template "Save" .}}
 {{template "Update" .}}
+{{template "Destroy" .}}
 {{template "Delete" .}}
 {{template "Query" .}}
 {{template "QueryRow" .}}
