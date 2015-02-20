@@ -323,14 +323,29 @@ func TestHasMany(t *testing.T) {
 	assertEqualStruct(t, posts[0], expect)
 }
 
+func TestBelongsTo(t *testing.T) {
+	defer func() {
+		User{}.DeleteAll()
+		Post{}.DeleteAll()
+	}()
+
+	expect, _ := User{}.Create(UserParams{Name: "test1"})
+	p, _ := Post{}.Create(PostParams{UserId: expect.Id, Name: "name"})
+
+	user, err := p.User()
+	assertError(t, err)
+	assertEqualStruct(t, user, expect)
+}
+
 func TestJoins(t *testing.T) {
 	defer func() {
 		User{}.DeleteAll()
 		Post{}.DeleteAll()
 	}()
 
+	// User joins posts
 	u, _ := User{}.Create(UserParams{Name: "test1"})
-	Post{}.Create(PostParams{UserId: u.Id, Name: "name"})
+	p1, _ := Post{}.Create(PostParams{UserId: u.Id, Name: "name"})
 	p2 := Post{UserId: u.Id, Name: "invalid"}
 	p2.Save(false)
 
@@ -340,6 +355,15 @@ func TestJoins(t *testing.T) {
 		t.Errorf("record count should be 1, but %v", len(users))
 	}
 	assertEqualStruct(t, users[0], u)
+
+	// Posts joins user
+	posts, err := Post{}.JoinsUser().Where("posts.name", "name").Query()
+	assertError(t, err)
+
+	if len(posts) != 1 {
+		t.Errorf("record count should be 1, but %v", len(posts))
+	}
+	assertEqualStruct(t, posts[0], p1)
 }
 
 func assertEqualStruct(t *testing.T, expect, actual interface{}) {

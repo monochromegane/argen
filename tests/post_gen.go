@@ -176,6 +176,37 @@ func (m Post) IsValid() (bool, *ar.Errors) {
 	return result, errors
 }
 
+func (m *Post) User() (*User, error) {
+	asc := m.belongsToUser()
+	pk := "id"
+	fk := "user_id"
+	if asc != nil && asc.PrimaryKey != "" {
+		pk = asc.PrimaryKey
+	}
+	if asc != nil && asc.ForeignKey != "" {
+		fk = asc.ForeignKey
+	}
+	return User{}.Where(pk, m.fieldValueByName(fk)).QueryRow()
+}
+
+func (m Post) JoinsUser() *PostRelation {
+	return m.newRelation().JoinsUser()
+}
+
+func (r *PostRelation) JoinsUser() *PostRelation {
+	asc := r.src.belongsToUser()
+	pk := "id"
+	fk := "user_id"
+	if asc != nil && asc.PrimaryKey != "" {
+		pk = asc.PrimaryKey
+	}
+	if asc != nil && asc.ForeignKey != "" {
+		fk = asc.ForeignKey
+	}
+	r.Relation.InnerJoin("users", fmt.Sprintf("users.%s = posts.%s", pk, fk))
+	return r
+}
+
 type PostParams Post
 
 func (m Post) Create(p PostParams) (*Post, *ar.Errors) {

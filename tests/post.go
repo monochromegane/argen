@@ -10,6 +10,10 @@ type Post struct {
 	Name   string
 }
 
+func (p Post) belongsToUser() *ar.Association {
+	return nil
+}
+
 func (p Post) validatesName() ar.Rule {
 	return ar.MakeRule().Format().With("name").OnCreate()
 }

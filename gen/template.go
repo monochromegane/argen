@@ -44,7 +44,8 @@ var structTemplates = Templates{
 	hasMany,
 	hasOne,
 	belongsTo,
-	joins,
+	joinsHasAny,
+	joinsBelongsTo,
 	scope,
 	explain,
 	delete,
@@ -93,15 +94,15 @@ import (
 {{end}}
 {{range .HasMany}}
 {{template "HasMany" .}}
-{{template "Joins" .}}
+{{template "JoinsHasAny" .}}
 {{end}}
 {{range .HasOne}}
 {{template "HasOne" .}}
-{{template "Joins" .}}
+{{template "JoinsHasAny" .}}
 {{end}}
 {{range .BelongsTo}}
 {{template "BelongsTo" .}}
-{{template "Joins" .}}
+{{template "JoinsBelongsTo" .}}
 {{end}}
 {{template "Create" .}}
 {{template "Save" .}}
