@@ -99,6 +99,10 @@ func (h HasMany) ForeignKey() string {
 	return fmt.Sprintf("%s_id", toSnakeCase(h.funcType.Recv))
 }
 
+func (h HasMany) ForeignKeyField() string {
+	return fmt.Sprintf("%sId", h.funcType.Recv)
+}
+
 type BelongsTo struct {
 	Recv *structType
 	funcType

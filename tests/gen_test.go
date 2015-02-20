@@ -171,6 +171,17 @@ func TestIsValid(t *testing.T) {
 	}
 }
 
+func TestBuild(t *testing.T) {
+	defer User{}.DeleteAll()
+	u, _ := User{}.Create(UserParams{Name: "TestCreate"})
+
+	p := u.BuildPost(PostParams{Name: "name"})
+
+	if p.UserId != u.Id {
+		t.Errorf("column value should be %v, but %v", u.Id, p.UserId)
+	}
+}
+
 func TestCreate(t *testing.T) {
 	u, errs := User{}.Create(UserParams{
 		Name: "TestCreate",

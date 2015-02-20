@@ -206,6 +206,11 @@ func (r *UserRelation) JoinsPosts() *UserRelation {
 	return r
 }
 
+func (m *User) BuildPost(p PostParams) *Post {
+	p.UserId = m.Id
+	return Post{}.Build(p)
+}
+
 type UserParams User
 
 func (m User) Build(p UserParams) *User {

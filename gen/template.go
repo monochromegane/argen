@@ -47,6 +47,7 @@ var structTemplates = Templates{
 	belongsTo,
 	joinsHasAny,
 	joinsBelongsTo,
+	buildHasAny,
 	scope,
 	explain,
 	delete,
@@ -96,10 +97,12 @@ import (
 {{range .HasMany}}
 {{template "HasMany" .}}
 {{template "JoinsHasAny" .}}
+{{template "BuildHasAny" .}}
 {{end}}
 {{range .HasOne}}
 {{template "HasOne" .}}
 {{template "JoinsHasAny" .}}
+{{template "BuildHasAny" .}}
 {{end}}
 {{range .BelongsTo}}
 {{template "BelongsTo" .}}
