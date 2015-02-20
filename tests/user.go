@@ -10,6 +10,10 @@ type User struct {
 	Age  int
 }
 
+func (m User) hasManyPosts() *ar.Association {
+	return nil
+}
+
 func (m User) scopeOlderThan(scope ar.Scope) *ar.Relation {
 	return scope.Where("age", ">", scope.Args[0])
 }

@@ -305,6 +305,25 @@ func TestScope(t *testing.T) {
 	assertEqualStruct(t, users[0], expect)
 }
 
+func TestHasMany(t *testing.T) {
+	defer func() {
+		User{}.DeleteAll()
+		Post{}.DeleteAll()
+	}()
+
+	u, _ := User{}.Create(UserParams{Name: "test1"})
+	expect, _ := Post{}.Create(PostParams{UserId: u.Id, Name: "name"})
+
+	user, err := User{}.Find(u.Id)
+	posts, err := user.Posts()
+	assertError(t, err)
+	if len(posts) != 1 {
+		t.Errorf("record count should be 1, but %v", len(posts))
+	}
+	assertEqualStruct(t, posts[0], expect)
+
+}
+
 func assertEqualStruct(t *testing.T, expect, actual interface{}) {
 	if !reflect.DeepEqual(expect, actual) {
 		t.Errorf("struct should be equal to %v, but %v", expect, actual)

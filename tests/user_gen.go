@@ -183,6 +183,26 @@ func (r *UserRelation) OlderThan(args ...interface{}) *UserRelation {
 	return r
 }
 
+func (m *User) Posts() ([]*Post, error) {
+	asc := m.hasManyPosts()
+	fk := "user_id"
+	if asc != nil && asc.ForeignKey != "" {
+		fk = asc.ForeignKey
+	}
+	return Post{}.Where(fk, m.Id).Query()
+}
+
+func (m User) JoinsPosts() *UserRelation {
+	r := m.newRelation()
+	r.Relation.InnerJoin("posts", "posts.id", "post_id")
+	return r
+}
+
+func (r *UserRelation) JoinsPosts() *UserRelation {
+	r.Relation.InnerJoin("posts", "posts.id", "post_id")
+	return r
+}
+
 type UserParams User
 
 func (m User) Create(p UserParams) (*User, *ar.Errors) {
