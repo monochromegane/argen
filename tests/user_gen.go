@@ -193,13 +193,16 @@ func (m *User) Posts() ([]*Post, error) {
 }
 
 func (m User) JoinsPosts() *UserRelation {
-	r := m.newRelation()
-	r.Relation.InnerJoin("posts", "posts.id", "post_id")
-	return r
+	return m.newRelation().JoinsPosts()
 }
 
 func (r *UserRelation) JoinsPosts() *UserRelation {
-	r.Relation.InnerJoin("posts", "posts.id", "post_id")
+	asc := r.src.hasManyPosts()
+	fk := "user_id"
+	if asc != nil && asc.ForeignKey != "" {
+		fk = asc.ForeignKey
+	}
+	r.Relation.InnerJoin("posts", fmt.Sprintf("posts.%s = users.id", fk))
 	return r
 }
 

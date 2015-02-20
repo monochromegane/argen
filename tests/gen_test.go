@@ -321,7 +321,25 @@ func TestHasMany(t *testing.T) {
 		t.Errorf("record count should be 1, but %v", len(posts))
 	}
 	assertEqualStruct(t, posts[0], expect)
+}
 
+func TestJoins(t *testing.T) {
+	defer func() {
+		User{}.DeleteAll()
+		Post{}.DeleteAll()
+	}()
+
+	u, _ := User{}.Create(UserParams{Name: "test1"})
+	Post{}.Create(PostParams{UserId: u.Id, Name: "name"})
+	p2 := Post{UserId: u.Id, Name: "invalid"}
+	p2.Save(false)
+
+	users, err := User{}.JoinsPosts().Where("posts.name", "name").Query()
+	assertError(t, err)
+	if len(users) != 1 {
+		t.Errorf("record count should be 1, but %v", len(users))
+	}
+	assertEqualStruct(t, users[0], u)
 }
 
 func assertEqualStruct(t *testing.T, expect, actual interface{}) {

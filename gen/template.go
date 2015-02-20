@@ -93,14 +93,14 @@ import (
 {{end}}
 {{range .HasMany}}
 {{template "HasMany" .}}
+{{template "Joins" .}}
 {{end}}
 {{range .HasOne}}
 {{template "HasOne" .}}
+{{template "Joins" .}}
 {{end}}
 {{range .BelongsTo}}
 {{template "BelongsTo" .}}
-{{end}}
-{{range .Joins}}
 {{template "Joins" .}}
 {{end}}
 {{template "Create" .}}

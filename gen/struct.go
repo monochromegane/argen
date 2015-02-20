@@ -90,16 +90,6 @@ func (s structType) BelongsTo() []BelongsTo {
 	return belongsTo
 }
 
-func (s structType) Joins() []Joins {
-	var joinses []Joins
-	for _, f := range s.Funcs {
-		if f.joins() {
-			joinses = append(joinses, Joins{&s, f})
-		}
-	}
-	return joinses
-}
-
 func (s structType) Scope() []Scope {
 	var scope []Scope
 	for _, f := range s.Funcs {

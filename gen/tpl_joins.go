@@ -4,13 +4,16 @@ var joins = &Template{
 	Name: "Joins",
 	Text: `
 func (m {{.Recv.Name}}) Joins{{.Func}}() *{{.Recv.Name}}Relation {
-        r := m.newRelation()
-	r.Relation.InnerJoin("{{.TableName}}", "{{.TableName}}.{{.PrimaryKey}}", "{{.ForeignKey}}")
-        return r
+        return m.newRelation().Joins{{.Func}}()
 }
 
 func (r *{{.Recv.Name}}Relation) Joins{{.Func}}() *{{.Recv.Name}}Relation {
-	r.Relation.InnerJoin("{{.TableName}}", "{{.TableName}}.{{.PrimaryKey}}", "{{.ForeignKey}}")
+	asc := r.src.{{.FuncName}}()
+	fk := "{{.ForeignKey}}"
+	if asc != nil && asc.ForeignKey != "" {
+		fk = asc.ForeignKey
+	}
+	r.Relation.InnerJoin("{{.TableName}}", fmt.Sprintf("{{.TableName}}.%s = {{.Recv.TableName}}.{{.Recv.PrimaryKeyColumn}}", fk))
         return r
 }
 `}

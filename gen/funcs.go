@@ -66,6 +66,10 @@ func (h HasOne) Model() string {
 	return inflector.Singularize(h.Func())
 }
 
+func (h HasOne) TableName() string {
+	return inflector.Pluralize(toSnakeCase(h.Func()))
+}
+
 func (h HasOne) ForeignKey() string {
 	return fmt.Sprintf("%s_id", toSnakeCase(h.funcType.Recv))
 }
@@ -85,6 +89,10 @@ func (h HasMany) Func() string {
 
 func (h HasMany) Model() string {
 	return inflector.Singularize(h.Func())
+}
+
+func (h HasMany) TableName() string {
+	return toSnakeCase(h.Func())
 }
 
 func (h HasMany) ForeignKey() string {
@@ -112,43 +120,12 @@ func (b BelongsTo) PrimaryKey() string {
 	return "id"
 }
 
+func (b BelongsTo) TableName() string {
+	return inflector.Pluralize(toSnakeCase(b.Func()))
+}
+
 func (b BelongsTo) ForeignKey() string {
 	return fmt.Sprintf("%s_id", toSnakeCase(b.Model()))
-}
-
-type Joins struct {
-	Recv *structType
-	funcType
-}
-
-func (j Joins) FuncName() string {
-	return j.funcType.Name
-}
-
-func (j Joins) Func() string {
-	funcName := j.funcType.Name
-	words := []string{"belongsTo", "hasMany", "hasOne"}
-	for _, w := range words {
-		funcName = strings.Replace(funcName, w, "", 1)
-
-	}
-	return funcName
-}
-
-func (j Joins) TableName() string {
-	return toSnakeCase(inflector.Pluralize(j.Func()))
-}
-
-func (j Joins) Model() string {
-	return inflector.Singularize(j.Func())
-}
-
-func (j Joins) PrimaryKey() string {
-	return "id"
-}
-
-func (j Joins) ForeignKey() string {
-	return fmt.Sprintf("%s_id", toSnakeCase(j.Model()))
 }
 
 type Scope struct {
