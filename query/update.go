@@ -45,5 +45,5 @@ func (u *Update) Build() (string, []interface{}) {
 	baseQuery := fmt.Sprintf("UPDATE %s SET %s", u.table, strings.Join(sets, ", "))
 
 	whereQuery, whereBinds := u.where.build()
-	return baseQuery + whereQuery, append(binds, whereBinds...)
+	return baseQuery + whereQuery + ";", append(binds, whereBinds...)
 }

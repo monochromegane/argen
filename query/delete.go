@@ -32,5 +32,5 @@ func (d *Delete) Build() (string, []interface{}) {
 		query += q
 		binds = append(binds, b...)
 	}
-	return query, binds
+	return query + ";", binds
 }
