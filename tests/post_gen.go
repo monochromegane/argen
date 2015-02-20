@@ -209,12 +209,16 @@ func (r *PostRelation) JoinsUser() *PostRelation {
 
 type PostParams Post
 
-func (m Post) Create(p PostParams) (*Post, *ar.Errors) {
-	n := &Post{
+func (m Post) Build(p PostParams) *Post {
+	return &Post{
 		Id:     p.Id,
 		UserId: p.UserId,
 		Name:   p.Name,
 	}
+}
+
+func (m Post) Create(p PostParams) (*Post, *ar.Errors) {
+	n := m.Build(p)
 	_, errs := n.Save()
 	return n, errs
 }

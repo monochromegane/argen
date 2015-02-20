@@ -208,12 +208,16 @@ func (r *UserRelation) JoinsPosts() *UserRelation {
 
 type UserParams User
 
-func (m User) Create(p UserParams) (*User, *ar.Errors) {
-	n := &User{
+func (m User) Build(p UserParams) *User {
+	return &User{
 		Id:   p.Id,
 		Name: p.Name,
 		Age:  p.Age,
 	}
+}
+
+func (m User) Create(p UserParams) (*User, *ar.Errors) {
+	n := m.Build(p)
 	_, errs := n.Save()
 	return n, errs
 }

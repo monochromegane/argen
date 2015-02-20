@@ -23,6 +23,7 @@ func (t Template) toDefine() string {
 
 var structTemplates = Templates{
 	fieldByName,
+	build,
 	create,
 	save,
 	sel,
@@ -104,6 +105,7 @@ import (
 {{template "BelongsTo" .}}
 {{template "JoinsBelongsTo" .}}
 {{end}}
+{{template "Build" .}}
 {{template "Create" .}}
 {{template "Save" .}}
 {{template "Update" .}}
