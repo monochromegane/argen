@@ -250,6 +250,7 @@ func (m *User) Save(validate ...bool) (bool, *ar.Errors) {
 			"name": m.Name,
 			"age":  m.Age,
 		}).Build()
+		defer Log(time.Now(), q, b...)
 
 		if result, err := db.Exec(q, b...); err != nil {
 			errs.AddError("base", err)
@@ -267,6 +268,8 @@ func (m *User) Save(validate ...bool) (bool, *ar.Errors) {
 			"name": m.Name,
 			"age":  m.Age,
 		}).Where("id", m.Id).Build()
+		defer Log(time.Now(), q, b...)
+
 		if _, err := db.Exec(q, b...); err != nil {
 			errs.AddError("base", err)
 			return false, errs
@@ -311,6 +314,8 @@ func (m *User) Delete() (bool, *ar.Errors) {
 	errs := &ar.Errors{}
 	del := ar.NewDelete()
 	q, b := del.Table("users").Where("id", m.Id).Build()
+	defer Log(time.Now(), q, b...)
+
 	if _, err := db.Exec(q, b...); err != nil {
 		errs.AddError("base", err)
 		return false, errs
@@ -323,6 +328,8 @@ func (m User) DeleteAll() (bool, *ar.Errors) {
 	del := ar.NewDelete()
 	del.Table("users")
 	q, b := del.Build()
+	defer Log(time.Now(), q, b...)
+
 	if _, err := db.Exec(q, b...); err != nil {
 		errs.AddError("base", err)
 		return false, errs

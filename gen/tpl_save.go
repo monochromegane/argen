@@ -23,6 +23,7 @@ func (m *{{.Name}}) Save(validate ...bool) (bool, *ar.Errors) {
                 q, b := ins.Table("{{.TableName}}").Params(map[string]interface{}{ {{range .FieldsWithoutPrimaryKey}}
 			"{{.ColumnName}}": m.{{.Name}},{{end}}
                 }).Build()
+		defer Log(time.Now(), q, b...)
 
                 if result, err := db.Exec(q, b...); err != nil {
 			errs.AddError("base", err)
@@ -38,6 +39,8 @@ func (m *{{.Name}}) Save(validate ...bool) (bool, *ar.Errors) {
 		q, b := upd.Table("{{.TableName}}").Params(map[string]interface{}{ {{range .Fields}}
 		"{{.ColumnName}}": m.{{.Name}},{{end}}
 		}).Where("{{.PrimaryKeyColumn}}", m.{{.PrimaryKeyField}}).Build()
+		defer Log(time.Now(), q, b...)
+
 		if _, err := db.Exec(q, b...); err != nil {
 			errs.AddError("base", err)
 			return false, errs

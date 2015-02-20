@@ -19,6 +19,7 @@ func TestMain(m *testing.M) {
 	defer db.Close()
 
 	Use(db)
+	LogMode(true)
 	sqlStmt := `
 	create table users (id integer not null primary key, name text, age integer);
 	create table posts (id integer not null primary key, user_id integer, name text);

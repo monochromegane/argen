@@ -246,6 +246,7 @@ func (m *Post) Save(validate ...bool) (bool, *ar.Errors) {
 			"user_id": m.UserId,
 			"name":    m.Name,
 		}).Build()
+		defer Log(time.Now(), q, b...)
 
 		if result, err := db.Exec(q, b...); err != nil {
 			errs.AddError("base", err)
@@ -263,6 +264,8 @@ func (m *Post) Save(validate ...bool) (bool, *ar.Errors) {
 			"user_id": m.UserId,
 			"name":    m.Name,
 		}).Where("id", m.Id).Build()
+		defer Log(time.Now(), q, b...)
+
 		if _, err := db.Exec(q, b...); err != nil {
 			errs.AddError("base", err)
 			return false, errs
@@ -307,6 +310,8 @@ func (m *Post) Delete() (bool, *ar.Errors) {
 	errs := &ar.Errors{}
 	del := ar.NewDelete()
 	q, b := del.Table("posts").Where("id", m.Id).Build()
+	defer Log(time.Now(), q, b...)
+
 	if _, err := db.Exec(q, b...); err != nil {
 		errs.AddError("base", err)
 		return false, errs
@@ -319,6 +324,8 @@ func (m Post) DeleteAll() (bool, *ar.Errors) {
 	del := ar.NewDelete()
 	del.Table("posts")
 	q, b := del.Build()
+	defer Log(time.Now(), q, b...)
+
 	if _, err := db.Exec(q, b...); err != nil {
 		errs.AddError("base", err)
 		return false, errs

@@ -7,6 +7,8 @@ func (m *{{.Name}}) Delete() (bool, *ar.Errors) {
         errs := &ar.Errors{}
         del := ar.NewDelete()
 	q, b := del.Table("{{.TableName}}").Where("{{.PrimaryKeyColumn}}", m.{{.PrimaryKeyField}}).Build()
+	defer Log(time.Now(), q, b...)
+
         if _, err := db.Exec(q, b...); err != nil {
                 errs.AddError("base", err)
                 return false, errs
@@ -19,6 +21,8 @@ func (m {{.Name}}) DeleteAll() (bool, *ar.Errors) {
         del := ar.NewDelete()
         del.Table("{{.TableName}}")
         q, b := del.Build()
+	defer Log(time.Now(), q, b...)
+
         if _, err := db.Exec(q, b...); err != nil {
                 errs.AddError("base", err)
                 return false, errs
