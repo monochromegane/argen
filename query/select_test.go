@@ -9,7 +9,7 @@ func TestSelect(t *testing.T) {
 
 	q, b := s.Build()
 
-	assertQuery(t, "SELECT columnA, columnB FROM table;", q)
+	assertQuery(t, "SELECT table.columnA, table.columnB FROM table;", q)
 	assertEmptyBinds(t, b)
 }
 
@@ -20,7 +20,7 @@ func TestSelectExplain(t *testing.T) {
 
 	q, b := s.Explain().Build()
 
-	assertQuery(t, "EXPLAIN SELECT columnA, columnB FROM table;", q)
+	assertQuery(t, "EXPLAIN SELECT table.columnA, table.columnB FROM table;", q)
 	assertEmptyBinds(t, b)
 }
 
@@ -32,7 +32,7 @@ func TestSelectInnerJoin(t *testing.T) {
 
 	q, b := s.Build()
 
-	assertQuery(t, "SELECT columnA, columnB FROM table INNER JOIN tableB ON id = tableB.table_id;", q)
+	assertQuery(t, "SELECT table.columnA, table.columnB FROM table INNER JOIN tableB ON id = tableB.table_id;", q)
 	assertEmptyBinds(t, b)
 }
 
@@ -44,7 +44,7 @@ func TestSelectWhere(t *testing.T) {
 
 	q, b := s.Build()
 
-	assertQuery(t, "SELECT columnA, columnB FROM table WHERE columnA = ?;", q)
+	assertQuery(t, "SELECT table.columnA, table.columnB FROM table WHERE columnA = ?;", q)
 	assertBinds(t, []interface{}{"value"}, b)
 }
 
@@ -57,7 +57,7 @@ func TestSelectLimitAndOffset(t *testing.T) {
 
 	q, b := s.Build()
 
-	assertQuery(t, "SELECT columnA, columnB FROM table LIMIT ? OFFSET ?;", q)
+	assertQuery(t, "SELECT table.columnA, table.columnB FROM table LIMIT ? OFFSET ?;", q)
 	assertBinds(t, []interface{}{1, 2}, b)
 }
 
@@ -70,7 +70,7 @@ func TestSelectGroupByAndHaving(t *testing.T) {
 
 	q, b := s.Build()
 
-	assertQuery(t, "SELECT columnA, columnB FROM table GROUP BY columnA, columnB HAVING columnA = ?;", q)
+	assertQuery(t, "SELECT table.columnA, table.columnB FROM table GROUP BY columnA, columnB HAVING columnA = ?;", q)
 	assertBinds(t, []interface{}{"value"}, b)
 }
 
@@ -88,7 +88,7 @@ func TestSelectOrderBy(t *testing.T) {
 
 	q, b := s.Build()
 
-	assertQuery(t, "SELECT columnA, columnB FROM table ORDER BY columnA ASC;", q)
+	assertQuery(t, "SELECT table.columnA, table.columnB FROM table ORDER BY columnA ASC;", q)
 	assertEmptyBinds(t, b)
 }
 

@@ -98,7 +98,7 @@ func (s *Select) Build() (string, []interface{}) {
 
 	var binds []interface{}
 
-	query := fmt.Sprintf("SELECT %s FROM %s", strings.Join(s.columns, ", "), s.table)
+	query := fmt.Sprintf("SELECT %s FROM %s", strings.Join(s.columnsWithTable(), ", "), s.table)
 
 	if s.explain {
 		explain := "EXPLAIN "
@@ -156,4 +156,16 @@ func (s *Select) Build() (string, []interface{}) {
 
 	return query + ";", binds
 
+}
+
+func (s *Select) columnsWithTable() []string {
+	columns := []string{}
+	for _, c := range s.columns {
+		if s.table == "" || strings.ContainsAny(c, ".") {
+			columns = append(columns, c)
+		} else {
+			columns = append(columns, fmt.Sprintf("%s.%s", s.table, c))
+		}
+	}
+	return columns
 }
