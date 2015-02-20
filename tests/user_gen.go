@@ -17,6 +17,7 @@ func (m *User) newRelation() *UserRelation {
 	r.Table("users").Columns(
 		"id",
 		"name",
+		"age",
 	)
 
 	return &UserRelation{m, r}
@@ -171,12 +172,24 @@ func (m User) IsValid() (bool, *ar.Errors) {
 	return result, errors
 }
 
+func (m User) OlderThan(args ...interface{}) *UserRelation {
+	r := m.newRelation()
+	m.scopeOlderThan(ar.Scope{r.Relation, args})
+	return r
+}
+
+func (r *UserRelation) OlderThan(args ...interface{}) *UserRelation {
+	r.src.scopeOlderThan(ar.Scope{r.Relation, args})
+	return r
+}
+
 type UserParams User
 
 func (m User) Create(p UserParams) (*User, *ar.Errors) {
 	n := &User{
 		Id:   p.Id,
 		Name: p.Name,
+		Age:  p.Age,
 	}
 	_, errs := n.Save()
 	return n, errs
@@ -201,6 +214,7 @@ func (m *User) Save(validate ...bool) (bool, *ar.Errors) {
 		ins := ar.NewInsert()
 		q, b := ins.Table("users").Params(map[string]interface{}{
 			"name": m.Name,
+			"age":  m.Age,
 		}).Build()
 
 		if result, err := db.Exec(q, b...); err != nil {
@@ -217,6 +231,7 @@ func (m *User) Save(validate ...bool) (bool, *ar.Errors) {
 		q, b := upd.Table("users").Params(map[string]interface{}{
 			"id":   m.Id,
 			"name": m.Name,
+			"age":  m.Age,
 		}).Where("id", m.Id).Build()
 		if _, err := db.Exec(q, b...); err != nil {
 			errs.AddError("base", err)
@@ -234,6 +249,9 @@ func (m *User) Update(p UserParams) (bool, *ar.Errors) {
 	if !ar.IsZero(p.Name) {
 		m.Name = p.Name
 	}
+	if !ar.IsZero(p.Age) {
+		m.Age = p.Age
+	}
 	return m.Save()
 }
 
@@ -244,6 +262,9 @@ func (m *User) UpdateColumns(p UserParams) (bool, *ar.Errors) {
 	}
 	if !ar.IsZero(p.Name) {
 		m.Name = p.Name
+	}
+	if !ar.IsZero(p.Age) {
+		m.Age = p.Age
 	}
 	return m.Save(false)
 }
@@ -311,6 +332,8 @@ func (m *User) fieldValueByName(name string) interface{} {
 		return m.Id
 	case "name":
 		return m.Name
+	case "age":
+		return m.Age
 	default:
 		return ""
 	}
@@ -322,6 +345,8 @@ func (m *User) fieldPtrByName(name string) interface{} {
 		return &m.Id
 	case "name":
 		return &m.Name
+	case "age":
+		return &m.Age
 	default:
 		return nil
 	}

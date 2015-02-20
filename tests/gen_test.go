@@ -20,7 +20,7 @@ func TestMain(m *testing.M) {
 
 	Use(db)
 	sqlStmt := `
-	create table users (id integer not null primary key, name text);
+	create table users (id integer not null primary key, name text, age integer);
 	create table posts (id integer not null primary key, user_id integer, name text);
 	`
 	_, err = db.Exec(sqlStmt)
@@ -289,6 +289,20 @@ func TestDelete(t *testing.T) {
 	if actual != nil {
 		t.Errorf("record should be deleted, but isn't deleted %v", actual)
 	}
+}
+
+func TestScope(t *testing.T) {
+	defer User{}.DeleteAll()
+
+	User{}.Create(UserParams{Name: "test1", Age: 20})
+	expect, _ := User{}.Create(UserParams{Name: "test2", Age: 21})
+
+	users, _ := User{}.OlderThan(20).Query()
+
+	if len(users) != 1 {
+		t.Errorf("record count should be 1, but %v", len(users))
+	}
+	assertEqualStruct(t, users[0], expect)
 }
 
 func assertEqualStruct(t *testing.T, expect, actual interface{}) {
