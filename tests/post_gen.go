@@ -2,6 +2,7 @@ package tests
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/monochromegane/argen"
 	"github.com/monochromegane/goban"
@@ -122,6 +123,7 @@ func (r *PostRelation) Having(cond string, args ...interface{}) *PostRelation {
 func (r *PostRelation) Explain() error {
 	r.Relation.Explain()
 	q, b := r.Build()
+	defer Log(time.Now(), q, b...)
 	rows, err := db.Query(q, b...)
 	if err != nil {
 		return err
@@ -326,6 +328,7 @@ func (m Post) DeleteAll() (bool, *ar.Errors) {
 
 func (r *PostRelation) Query() ([]*Post, error) {
 	q, b := r.Build()
+	defer Log(time.Now(), q, b...)
 	rows, err := db.Query(q, b...)
 	if err != nil {
 		return nil, err
@@ -346,6 +349,7 @@ func (r *PostRelation) Query() ([]*Post, error) {
 
 func (r *PostRelation) QueryRow() (*Post, error) {
 	q, b := r.Build()
+	defer Log(time.Now(), q, b...)
 	row := &Post{}
 	err := db.QueryRow(q, b...).Scan(row.fieldPtrsByName(r.Relation.GetColumns())...)
 	if err != nil {

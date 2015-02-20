@@ -5,6 +5,7 @@ var queryRow = &Template{
 	Text: `
 func (r *{{.Name}}Relation) QueryRow() (*{{.Name}}, error) {
 	q, b := r.Build()
+	defer Log(time.Now(), q, b...)
 	row := &{{.Name}}{}
 	err := db.QueryRow(q, b...).Scan(row.fieldPtrsByName(r.Relation.GetColumns())...)
 	if err != nil {

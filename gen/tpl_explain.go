@@ -6,6 +6,7 @@ var explain = &Template{
 func (r *{{.Name}}Relation) Explain() error {
         r.Relation.Explain()
         q, b := r.Build()
+	defer Log(time.Now(), q, b...)
         rows, err := db.Query(q, b...)
         if err != nil {
                 return err

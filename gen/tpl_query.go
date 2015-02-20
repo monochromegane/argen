@@ -5,6 +5,7 @@ var query = &Template{
 	Text: `
 func (r *{{.Name}}Relation) Query() ([]*{{.Name}}, error) {
         q, b := r.Build()
+	defer Log(time.Now(), q, b...)
         rows, err := db.Query(q, b...)
         if err != nil {
                 return nil, err
