@@ -17,6 +17,11 @@ func Generate(from string, opts Option) error {
 		return err
 	}
 
+	err = writeToFile(toFileName("logger", opts.Prefix, opts.Suffix), structLogger, structs)
+	if err != nil {
+		return err
+	}
+
 	err = writeToFile(toFileName(from, opts.Prefix, opts.Suffix), structTemplate, structs)
 	if err != nil {
 		return err
