@@ -49,7 +49,6 @@ var structTemplates = Templates{
 	joinsBelongsTo,
 	buildHasAny,
 	scope,
-	explain,
 	delete,
 	destroy,
 	update,
@@ -105,7 +104,6 @@ import (
 {{template "Offset" .}}
 {{template "Group" .}}
 {{template "Having" .}}
-{{template "Explain" .}}
 {{template "Validation" .}}
 {{range .Scope}}
 {{template "Scope" .}}

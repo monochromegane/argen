@@ -8,6 +8,7 @@ import (
 	"unicode"
 
 	"github.com/monochromegane/argen/query"
+	"github.com/monochromegane/goban"
 )
 
 type Relation struct {
@@ -72,13 +73,32 @@ func (r *Relation) Having(cond string, args ...interface{}) *Relation {
 	return r
 }
 
-func (r *Relation) Explain() *Relation {
-	r.Select.Explain()
-	return r
-}
-
 func (r *Relation) Build() (string, []interface{}) {
 	return r.Select.Build()
+}
+
+func (r *Relation) Explain() error {
+	r.Select.Explain()
+	rows, err := r.Query()
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+
+	columns, _ := rows.Columns()
+	var values [][]string
+	for rows.Next() {
+		vals := make([]string, len(columns))
+		ptrs := make([]interface{}, len(columns))
+		for i, _ := range vals {
+			ptrs[i] = &vals[i]
+		}
+		rows.Scan(ptrs...)
+		values = append(values, vals)
+	}
+
+	goban.Render(columns, values)
+	return nil
 }
 
 func (r *Relation) Query() (*sql.Rows, error) {

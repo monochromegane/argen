@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/monochromegane/argen"
-	"github.com/monochromegane/goban"
 )
 
 type UserRelation struct {
@@ -117,29 +116,6 @@ func (r *UserRelation) Group(group string, groups ...string) *UserRelation {
 func (r *UserRelation) Having(cond string, args ...interface{}) *UserRelation {
 	r.Relation.Having(cond, args...)
 	return r
-}
-
-func (r *UserRelation) Explain() error {
-	rows, err := r.Relation.Explain().Query()
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
-
-	columns, _ := rows.Columns()
-	var values [][]string
-	for rows.Next() {
-		vals := make([]string, len(columns))
-		ptrs := make([]interface{}, len(columns))
-		for i, _ := range vals {
-			ptrs[i] = &vals[i]
-		}
-		rows.Scan(ptrs...)
-		values = append(values, vals)
-	}
-
-	goban.Render(columns, values)
-	return nil
 }
 
 func (m User) IsValid() (bool, *ar.Errors) {

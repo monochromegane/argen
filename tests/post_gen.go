@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/monochromegane/argen"
-	"github.com/monochromegane/goban"
 )
 
 type PostRelation struct {
@@ -117,29 +116,6 @@ func (r *PostRelation) Group(group string, groups ...string) *PostRelation {
 func (r *PostRelation) Having(cond string, args ...interface{}) *PostRelation {
 	r.Relation.Having(cond, args...)
 	return r
-}
-
-func (r *PostRelation) Explain() error {
-	rows, err := r.Relation.Explain().Query()
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
-
-	columns, _ := rows.Columns()
-	var values [][]string
-	for rows.Next() {
-		vals := make([]string, len(columns))
-		ptrs := make([]interface{}, len(columns))
-		for i, _ := range vals {
-			ptrs[i] = &vals[i]
-		}
-		rows.Scan(ptrs...)
-		values = append(values, vals)
-	}
-
-	goban.Render(columns, values)
-	return nil
 }
 
 func (m Post) IsValid() (bool, *ar.Errors) {
