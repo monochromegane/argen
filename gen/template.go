@@ -42,6 +42,8 @@ var structTemplates = Templates{
 	group,
 	having,
 	exists,
+	count,
+	all,
 	validation,
 	hasMany,
 	hasOne,
@@ -132,6 +134,8 @@ import (
 {{template "Query" .}}
 {{template "QueryRow" .}}
 {{template "Exists" .}}
+{{template "Count" .}}
+{{template "All" .}}
 {{template "FieldByName" .}}
 {{end}}
 ` + structTemplates.ToString()

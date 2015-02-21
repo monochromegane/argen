@@ -338,6 +338,18 @@ func (m User) Exists() bool {
 	return m.newRelation().Exists()
 }
 
+func (m User) Count(column ...string) int {
+	return m.newRelation().Count(column...)
+}
+
+func (m User) All() *UserRelation {
+	return m.newRelation().All()
+}
+
+func (r *UserRelation) All() *UserRelation {
+	return r
+}
+
 func (m *User) fieldValueByName(name string) interface{} {
 	switch name {
 	case "id", "users.id":

@@ -2,6 +2,7 @@ package ar
 
 import (
 	"database/sql"
+	"fmt"
 	"reflect"
 	"strings"
 	"time"
@@ -75,6 +76,18 @@ func (r *Relation) Having(cond string, args ...interface{}) *Relation {
 
 func (r *Relation) Build() (string, []interface{}) {
 	return r.Select.Build()
+}
+
+func (r *Relation) Count(column ...string) int {
+	c := "*"
+	if len(column) > 0 {
+		c = column[0]
+	}
+	var count int
+	if err := r.Columns(fmt.Sprintf("COUNT(%s)", c)).QueryRow(&count); err != nil {
+		return 0
+	}
+	return count
 }
 
 func (r *Relation) Exists() bool {

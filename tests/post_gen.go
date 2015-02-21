@@ -334,6 +334,18 @@ func (m Post) Exists() bool {
 	return m.newRelation().Exists()
 }
 
+func (m Post) Count(column ...string) int {
+	return m.newRelation().Count(column...)
+}
+
+func (m Post) All() *PostRelation {
+	return m.newRelation().All()
+}
+
+func (r *PostRelation) All() *PostRelation {
+	return r
+}
+
 func (m *Post) fieldValueByName(name string) interface{} {
 	switch name {
 	case "id", "posts.id":

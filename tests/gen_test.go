@@ -392,6 +392,34 @@ func TestExists(t *testing.T) {
 	}
 }
 
+func TestCount(t *testing.T) {
+	defer User{}.DeleteAll()
+	count := User{}.Count()
+	if count != 0 {
+		t.Errorf("record count should be 0, but %v", count)
+	}
+
+	User{}.Create(UserParams{Name: "test"})
+	count = User{}.Where("name", "test").Count("id")
+	if count != 1 {
+		t.Errorf("record count should be 1, but %v", count)
+	}
+}
+
+func TestAll(t *testing.T) {
+	defer User{}.DeleteAll()
+	users, _ := User{}.All().Query()
+	if len(users) != 0 {
+		t.Errorf("record count should be 0, but %v", len(users))
+	}
+
+	User{}.Create(UserParams{Name: "test"})
+	users, _ = User{}.Where("name", "test").All().Query()
+	if len(users) != 1 {
+		t.Errorf("record count should be 1, but %v", len(users))
+	}
+}
+
 func assertEqualStruct(t *testing.T, expect, actual interface{}) {
 	if !reflect.DeepEqual(expect, actual) {
 		t.Errorf("struct should be equal to %v, but %v", expect, actual)
