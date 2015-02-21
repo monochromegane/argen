@@ -8,7 +8,15 @@ func (m {{.Name}}) Select(columns ...string) *{{.Name}}Relation {
 }
 
 func (r *{{.Name}}Relation) Select(columns ...string) *{{.Name}}Relation {
-	r.Relation.Columns(columns...)
+	cs := []string{}
+	for _, c := range columns {
+		if r.src.isColumnName(c) {
+			cs = append(cs, fmt.Sprintf("{{.TableName}}.%s", c))
+		} else {
+			cs = append(cs, c)	
+		}
+	}
+	r.Relation.Columns(cs...)
 	return r
 }
 `}

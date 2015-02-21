@@ -12,14 +12,17 @@ type UserRelation struct {
 }
 
 func (m *User) newRelation() *UserRelation {
-	r := ar.NewRelation(db, logger)
-	r.Table("users").Columns(
+	r := &UserRelation{
+		m,
+		ar.NewRelation(db, logger).Table("users"),
+	}
+	r.Select(
 		"id",
 		"name",
 		"age",
 	)
 
-	return &UserRelation{m, r}
+	return r
 }
 
 func (m User) Select(columns ...string) *UserRelation {
@@ -27,7 +30,15 @@ func (m User) Select(columns ...string) *UserRelation {
 }
 
 func (r *UserRelation) Select(columns ...string) *UserRelation {
-	r.Relation.Columns(columns...)
+	cs := []string{}
+	for _, c := range columns {
+		if r.src.isColumnName(c) {
+			cs = append(cs, fmt.Sprintf("users.%s", c))
+		} else {
+			cs = append(cs, c)
+		}
+	}
+	r.Relation.Columns(cs...)
 	return r
 }
 
@@ -325,11 +336,11 @@ func (r *UserRelation) QueryRow() (*User, error) {
 
 func (m *User) fieldValueByName(name string) interface{} {
 	switch name {
-	case "id":
+	case "id", "users.id":
 		return m.Id
-	case "name":
+	case "name", "users.name":
 		return m.Name
-	case "age":
+	case "age", "users.age":
 		return m.Age
 	default:
 		return ""
@@ -338,11 +349,11 @@ func (m *User) fieldValueByName(name string) interface{} {
 
 func (m *User) fieldPtrByName(name string) interface{} {
 	switch name {
-	case "id":
+	case "id", "users.id":
 		return &m.Id
-	case "name":
+	case "name", "users.name":
 		return &m.Name
-	case "age":
+	case "age", "users.age":
 		return &m.Age
 	default:
 		return nil
@@ -356,4 +367,21 @@ func (m *User) fieldPtrsByName(names []string) []interface{} {
 		fields = append(fields, f)
 	}
 	return fields
+}
+
+func (m *User) isColumnName(name string) bool {
+	for _, c := range m.columnNames() {
+		if c == name {
+			return true
+		}
+	}
+	return false
+}
+
+func (m *User) columnNames() []string {
+	return []string{
+		"id",
+		"name",
+		"age",
+	}
 }

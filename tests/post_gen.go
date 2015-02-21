@@ -12,14 +12,17 @@ type PostRelation struct {
 }
 
 func (m *Post) newRelation() *PostRelation {
-	r := ar.NewRelation(db, logger)
-	r.Table("posts").Columns(
+	r := &PostRelation{
+		m,
+		ar.NewRelation(db, logger).Table("posts"),
+	}
+	r.Select(
 		"id",
 		"user_id",
 		"name",
 	)
 
-	return &PostRelation{m, r}
+	return r
 }
 
 func (m Post) Select(columns ...string) *PostRelation {
@@ -27,7 +30,15 @@ func (m Post) Select(columns ...string) *PostRelation {
 }
 
 func (r *PostRelation) Select(columns ...string) *PostRelation {
-	r.Relation.Columns(columns...)
+	cs := []string{}
+	for _, c := range columns {
+		if r.src.isColumnName(c) {
+			cs = append(cs, fmt.Sprintf("posts.%s", c))
+		} else {
+			cs = append(cs, c)
+		}
+	}
+	r.Relation.Columns(cs...)
 	return r
 }
 
@@ -321,11 +332,11 @@ func (r *PostRelation) QueryRow() (*Post, error) {
 
 func (m *Post) fieldValueByName(name string) interface{} {
 	switch name {
-	case "id":
+	case "id", "posts.id":
 		return m.Id
-	case "user_id":
+	case "user_id", "posts.user_id":
 		return m.UserId
-	case "name":
+	case "name", "posts.name":
 		return m.Name
 	default:
 		return ""
@@ -334,11 +345,11 @@ func (m *Post) fieldValueByName(name string) interface{} {
 
 func (m *Post) fieldPtrByName(name string) interface{} {
 	switch name {
-	case "id":
+	case "id", "posts.id":
 		return &m.Id
-	case "user_id":
+	case "user_id", "posts.user_id":
 		return &m.UserId
-	case "name":
+	case "name", "posts.name":
 		return &m.Name
 	default:
 		return nil
@@ -352,4 +363,21 @@ func (m *Post) fieldPtrsByName(names []string) []interface{} {
 		fields = append(fields, f)
 	}
 	return fields
+}
+
+func (m *Post) isColumnName(name string) bool {
+	for _, c := range m.columnNames() {
+		if c == name {
+			return true
+		}
+	}
+	return false
+}
+
+func (m *Post) columnNames() []string {
+	return []string{
+		"id",
+		"user_id",
+		"name",
+	}
 }

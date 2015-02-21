@@ -9,11 +9,14 @@ type {{.Name}}Relation struct {
 }
 
 func (m *{{.Name}}) newRelation() *{{.Name}}Relation {
-	r := ar.NewRelation(db, logger)
-        r.Table("{{.TableName}}").Columns({{range .Fields}}
+	r := &{{.Name}}Relation{
+		m,
+		ar.NewRelation(db, logger).Table("{{.TableName}}"),
+	}
+	r.Select({{range .Fields}}
 		"{{.ColumnName}}",{{end}}
 	)
-	{{if .DefaultScope}}m.defaultScope(ar.Scope{r, nil}){{end}}
-        return &{{.Name}}Relation{m, r}
+	{{if .DefaultScope}}m.defaultScope(ar.Scope{r.Relation, nil}){{end}}
+	return r
 }
 `}
