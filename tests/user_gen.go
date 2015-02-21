@@ -334,6 +334,10 @@ func (r *UserRelation) QueryRow() (*User, error) {
 	return row, nil
 }
 
+func (m User) Exists() bool {
+	return m.newRelation().Exists()
+}
+
 func (m *User) fieldValueByName(name string) interface{} {
 	switch name {
 	case "id", "users.id":

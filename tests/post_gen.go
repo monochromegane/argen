@@ -330,6 +330,10 @@ func (r *PostRelation) QueryRow() (*Post, error) {
 	return row, nil
 }
 
+func (m Post) Exists() bool {
+	return m.newRelation().Exists()
+}
+
 func (m *Post) fieldValueByName(name string) interface{} {
 	switch name {
 	case "id", "posts.id":

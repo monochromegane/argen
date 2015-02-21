@@ -77,6 +77,14 @@ func (r *Relation) Build() (string, []interface{}) {
 	return r.Select.Build()
 }
 
+func (r *Relation) Exists() bool {
+	var one int
+	if err := r.Columns("1").Limit(1).QueryRow(&one); err == sql.ErrNoRows {
+		return false
+	}
+	return true
+}
+
 func (r *Relation) Explain() error {
 	r.Select.Explain()
 	rows, err := r.Query()

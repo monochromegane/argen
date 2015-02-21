@@ -378,6 +378,20 @@ func TestJoins(t *testing.T) {
 	assertEqualStruct(t, posts[0], p1)
 }
 
+func TestExists(t *testing.T) {
+	defer User{}.DeleteAll()
+	exist := User{}.Exists()
+	if exist {
+		t.Errorf("record shouldn't exist, but exist")
+	}
+
+	User{}.Create(UserParams{Name: "test"})
+	exist = User{}.Where("name", "test").Exists()
+	if !exist {
+		t.Errorf("record should exist, but dosen't exist")
+	}
+}
+
 func assertEqualStruct(t *testing.T, expect, actual interface{}) {
 	if !reflect.DeepEqual(expect, actual) {
 		t.Errorf("struct should be equal to %v, but %v", expect, actual)
