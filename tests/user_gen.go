@@ -2,7 +2,6 @@ package tests
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/monochromegane/argen"
 	"github.com/monochromegane/goban"
@@ -14,7 +13,7 @@ type UserRelation struct {
 }
 
 func (m *User) newRelation() *UserRelation {
-	r := ar.NewRelation()
+	r := ar.NewRelation(db, logger)
 	r.Table("users").Columns(
 		"id",
 		"name",
@@ -121,10 +120,7 @@ func (r *UserRelation) Having(cond string, args ...interface{}) *UserRelation {
 }
 
 func (r *UserRelation) Explain() error {
-	r.Relation.Explain()
-	q, b := r.Build()
-	defer Log(time.Now(), q, b...)
-	rows, err := db.Query(q, b...)
+	rows, err := r.Relation.Explain().Query()
 	if err != nil {
 		return err
 	}
@@ -142,7 +138,6 @@ func (r *UserRelation) Explain() error {
 		values = append(values, vals)
 	}
 
-	fmt.Printf("%s %v\n", q, b)
 	goban.Render(columns, values)
 	return nil
 }
@@ -245,14 +240,12 @@ func (m *User) Save(validate ...bool) (bool, *ar.Errors) {
 	}
 	errs := &ar.Errors{}
 	if m.IsNewRecord() {
-		ins := ar.NewInsert()
-		q, b := ins.Table("users").Params(map[string]interface{}{
+		ins := ar.NewInsert(db, logger).Table("users").Params(map[string]interface{}{
 			"name": m.Name,
 			"age":  m.Age,
-		}).Build()
-		defer Log(time.Now(), q, b...)
+		})
 
-		if result, err := db.Exec(q, b...); err != nil {
+		if result, err := ins.Exec(); err != nil {
 			errs.AddError("base", err)
 			return false, errs
 		} else {
@@ -262,15 +255,13 @@ func (m *User) Save(validate ...bool) (bool, *ar.Errors) {
 		}
 		return true, nil
 	} else {
-		upd := ar.NewUpdate()
-		q, b := upd.Table("users").Params(map[string]interface{}{
+		upd := ar.NewUpdate(db, logger).Table("users").Params(map[string]interface{}{
 			"id":   m.Id,
 			"name": m.Name,
 			"age":  m.Age,
-		}).Where("id", m.Id).Build()
-		defer Log(time.Now(), q, b...)
+		}).Where("id", m.Id)
 
-		if _, err := db.Exec(q, b...); err != nil {
+		if _, err := upd.Exec(); err != nil {
 			errs.AddError("base", err)
 			return false, errs
 		}
@@ -312,11 +303,7 @@ func (m *User) Destroy() (bool, *ar.Errors) {
 
 func (m *User) Delete() (bool, *ar.Errors) {
 	errs := &ar.Errors{}
-	del := ar.NewDelete()
-	q, b := del.Table("users").Where("id", m.Id).Build()
-	defer Log(time.Now(), q, b...)
-
-	if _, err := db.Exec(q, b...); err != nil {
+	if _, err := ar.NewDelete(db, logger).Table("users").Where("id", m.Id).Exec(); err != nil {
 		errs.AddError("base", err)
 		return false, errs
 	}
@@ -325,12 +312,7 @@ func (m *User) Delete() (bool, *ar.Errors) {
 
 func (m User) DeleteAll() (bool, *ar.Errors) {
 	errs := &ar.Errors{}
-	del := ar.NewDelete()
-	del.Table("users")
-	q, b := del.Build()
-	defer Log(time.Now(), q, b...)
-
-	if _, err := db.Exec(q, b...); err != nil {
+	if _, err := ar.NewDelete(db, logger).Table("users").Exec(); err != nil {
 		errs.AddError("base", err)
 		return false, errs
 	}
@@ -338,9 +320,7 @@ func (m User) DeleteAll() (bool, *ar.Errors) {
 }
 
 func (r *UserRelation) Query() ([]*User, error) {
-	q, b := r.Build()
-	defer Log(time.Now(), q, b...)
-	rows, err := db.Query(q, b...)
+	rows, err := r.Relation.Query()
 	if err != nil {
 		return nil, err
 	}
@@ -359,10 +339,8 @@ func (r *UserRelation) Query() ([]*User, error) {
 }
 
 func (r *UserRelation) QueryRow() (*User, error) {
-	q, b := r.Build()
-	defer Log(time.Now(), q, b...)
 	row := &User{}
-	err := db.QueryRow(q, b...).Scan(row.fieldPtrsByName(r.Relation.GetColumns())...)
+	err := r.Relation.QueryRow(row.fieldPtrsByName(r.Relation.GetColumns())...)
 	if err != nil {
 		return nil, err
 	}

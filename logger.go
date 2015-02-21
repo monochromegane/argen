@@ -8,9 +8,14 @@ import (
 
 type Logger struct {
 	*log.Logger
+	LogMode bool
 }
 
 func (l Logger) Print(values ...interface{}) {
+	if !l.LogMode {
+		return
+	}
+
 	log := []interface{}{}
 	// currentTime
 	currentTime := "\033[33m[" + time.Now().Format("2006-01-02 15:04:05") + "]\033[0m"

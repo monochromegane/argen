@@ -12,6 +12,6 @@ func TestUpdate(t *testing.T) {
 
 	q, b := update.Build()
 
-	assertQuery(t, "UPDATE table SET columnA = ? WHERE columnA = ?", q)
+	assertQuery(t, "UPDATE table SET columnA = ? WHERE columnA = ?;", q)
 	assertBinds(t, []interface{}{"value1", "value1"}, b)
 }

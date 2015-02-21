@@ -9,7 +9,7 @@ type {{.Name}}Relation struct {
 }
 
 func (m *{{.Name}}) newRelation() *{{.Name}}Relation {
-	r := ar.NewRelation()
+	r := ar.NewRelation(db, logger)
         r.Table("{{.TableName}}").Columns({{range .Fields}}
 		"{{.ColumnName}}",{{end}}
 	)

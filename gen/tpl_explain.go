@@ -4,10 +4,7 @@ var explain = &Template{
 	Name: "Explain",
 	Text: `
 func (r *{{.Name}}Relation) Explain() error {
-        r.Relation.Explain()
-        q, b := r.Build()
-	defer Log(time.Now(), q, b...)
-        rows, err := db.Query(q, b...)
+        rows, err := r.Relation.Explain().Query()
         if err != nil {
                 return err
         }
@@ -25,7 +22,6 @@ func (r *{{.Name}}Relation) Explain() error {
                 values = append(values, vals)
         }
 
-        fmt.Printf("%s %v\n", q, b)
         goban.Render(columns, values)
         return nil
 }

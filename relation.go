@@ -1,8 +1,10 @@
 package ar
 
 import (
+	"database/sql"
 	"reflect"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/monochromegane/argen/query"
@@ -10,34 +12,16 @@ import (
 
 type Relation struct {
 	*query.Select
+	db     *sql.DB
+	logger *Logger
 }
 
-type Insert struct {
-	*query.Insert
-}
-
-type Update struct {
-	*query.Update
-}
-
-type Delete struct {
-	*query.Delete
-}
-
-func NewRelation() *Relation {
-	return &Relation{&query.Select{}}
-}
-
-func NewInsert() *Insert {
-	return &Insert{&query.Insert{}}
-}
-
-func NewUpdate() *Update {
-	return &Update{&query.Update{}}
-}
-
-func NewDelete() *Delete {
-	return &Delete{&query.Delete{}}
+func NewRelation(db *sql.DB, logger *Logger) *Relation {
+	return &Relation{
+		Select: &query.Select{},
+		db:     db,
+		logger: logger,
+	}
 }
 
 func (r *Relation) Table(table string) *Relation {
@@ -95,6 +79,22 @@ func (r *Relation) Explain() *Relation {
 
 func (r *Relation) Build() (string, []interface{}) {
 	return r.Select.Build()
+}
+
+func (r *Relation) Query() (*sql.Rows, error) {
+	q, b := r.Build()
+	defer r.log(time.Now(), q, b...)
+	return r.db.Query(q, b...)
+}
+
+func (r *Relation) QueryRow(dest ...interface{}) error {
+	q, b := r.Build()
+	defer r.log(time.Now(), q, b...)
+	return r.db.QueryRow(q, b...).Scan(dest...)
+}
+
+func (r *Relation) log(t time.Time, sql string, args ...interface{}) {
+	r.logger.Print(time.Now().Sub(t), sql, args)
 }
 
 func IsZero(v interface{}) bool {

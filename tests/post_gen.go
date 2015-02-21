@@ -2,7 +2,6 @@ package tests
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/monochromegane/argen"
 	"github.com/monochromegane/goban"
@@ -14,7 +13,7 @@ type PostRelation struct {
 }
 
 func (m *Post) newRelation() *PostRelation {
-	r := ar.NewRelation()
+	r := ar.NewRelation(db, logger)
 	r.Table("posts").Columns(
 		"id",
 		"user_id",
@@ -121,10 +120,7 @@ func (r *PostRelation) Having(cond string, args ...interface{}) *PostRelation {
 }
 
 func (r *PostRelation) Explain() error {
-	r.Relation.Explain()
-	q, b := r.Build()
-	defer Log(time.Now(), q, b...)
-	rows, err := db.Query(q, b...)
+	rows, err := r.Relation.Explain().Query()
 	if err != nil {
 		return err
 	}
@@ -142,7 +138,6 @@ func (r *PostRelation) Explain() error {
 		values = append(values, vals)
 	}
 
-	fmt.Printf("%s %v\n", q, b)
 	goban.Render(columns, values)
 	return nil
 }
@@ -241,14 +236,12 @@ func (m *Post) Save(validate ...bool) (bool, *ar.Errors) {
 	}
 	errs := &ar.Errors{}
 	if m.IsNewRecord() {
-		ins := ar.NewInsert()
-		q, b := ins.Table("posts").Params(map[string]interface{}{
+		ins := ar.NewInsert(db, logger).Table("posts").Params(map[string]interface{}{
 			"user_id": m.UserId,
 			"name":    m.Name,
-		}).Build()
-		defer Log(time.Now(), q, b...)
+		})
 
-		if result, err := db.Exec(q, b...); err != nil {
+		if result, err := ins.Exec(); err != nil {
 			errs.AddError("base", err)
 			return false, errs
 		} else {
@@ -258,15 +251,13 @@ func (m *Post) Save(validate ...bool) (bool, *ar.Errors) {
 		}
 		return true, nil
 	} else {
-		upd := ar.NewUpdate()
-		q, b := upd.Table("posts").Params(map[string]interface{}{
+		upd := ar.NewUpdate(db, logger).Table("posts").Params(map[string]interface{}{
 			"id":      m.Id,
 			"user_id": m.UserId,
 			"name":    m.Name,
-		}).Where("id", m.Id).Build()
-		defer Log(time.Now(), q, b...)
+		}).Where("id", m.Id)
 
-		if _, err := db.Exec(q, b...); err != nil {
+		if _, err := upd.Exec(); err != nil {
 			errs.AddError("base", err)
 			return false, errs
 		}
@@ -308,11 +299,7 @@ func (m *Post) Destroy() (bool, *ar.Errors) {
 
 func (m *Post) Delete() (bool, *ar.Errors) {
 	errs := &ar.Errors{}
-	del := ar.NewDelete()
-	q, b := del.Table("posts").Where("id", m.Id).Build()
-	defer Log(time.Now(), q, b...)
-
-	if _, err := db.Exec(q, b...); err != nil {
+	if _, err := ar.NewDelete(db, logger).Table("posts").Where("id", m.Id).Exec(); err != nil {
 		errs.AddError("base", err)
 		return false, errs
 	}
@@ -321,12 +308,7 @@ func (m *Post) Delete() (bool, *ar.Errors) {
 
 func (m Post) DeleteAll() (bool, *ar.Errors) {
 	errs := &ar.Errors{}
-	del := ar.NewDelete()
-	del.Table("posts")
-	q, b := del.Build()
-	defer Log(time.Now(), q, b...)
-
-	if _, err := db.Exec(q, b...); err != nil {
+	if _, err := ar.NewDelete(db, logger).Table("posts").Exec(); err != nil {
 		errs.AddError("base", err)
 		return false, errs
 	}
@@ -334,9 +316,7 @@ func (m Post) DeleteAll() (bool, *ar.Errors) {
 }
 
 func (r *PostRelation) Query() ([]*Post, error) {
-	q, b := r.Build()
-	defer Log(time.Now(), q, b...)
-	rows, err := db.Query(q, b...)
+	rows, err := r.Relation.Query()
 	if err != nil {
 		return nil, err
 	}
@@ -355,10 +335,8 @@ func (r *PostRelation) Query() ([]*Post, error) {
 }
 
 func (r *PostRelation) QueryRow() (*Post, error) {
-	q, b := r.Build()
-	defer Log(time.Now(), q, b...)
 	row := &Post{}
-	err := db.QueryRow(q, b...).Scan(row.fieldPtrsByName(r.Relation.GetColumns())...)
+	err := r.Relation.QueryRow(row.fieldPtrsByName(r.Relation.GetColumns())...)
 	if err != nil {
 		return nil, err
 	}

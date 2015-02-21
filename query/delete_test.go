@@ -9,6 +9,6 @@ func TestDelete(t *testing.T) {
 
 	q, b := del.Build()
 
-	assertQuery(t, "DELETE FROM table WHERE columnA = ?", q)
+	assertQuery(t, "DELETE FROM table WHERE columnA = ?;", q)
 	assertBinds(t, []interface{}{"value1", "value2", "value1"}, b)
 }

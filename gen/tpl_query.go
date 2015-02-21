@@ -4,13 +4,11 @@ var query = &Template{
 	Name: "Query",
 	Text: `
 func (r *{{.Name}}Relation) Query() ([]*{{.Name}}, error) {
-        q, b := r.Build()
-	defer Log(time.Now(), q, b...)
-        rows, err := db.Query(q, b...)
-        if err != nil {
-                return nil, err
-        }
-        defer rows.Close()
+	rows, err := r.Relation.Query()
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
         results := []*{{.Name}}{}
         for rows.Next() {

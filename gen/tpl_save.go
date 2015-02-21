@@ -19,13 +19,11 @@ func (m *{{.Name}}) Save(validate ...bool) (bool, *ar.Errors) {
 	}
 	errs := &ar.Errors{}
         if m.IsNewRecord() {
-		ins := ar.NewInsert()
-                q, b := ins.Table("{{.TableName}}").Params(map[string]interface{}{ {{range .FieldsWithoutPrimaryKey}}
+                ins := ar.NewInsert(db, logger).Table("{{.TableName}}").Params(map[string]interface{}{ {{range .FieldsWithoutPrimaryKey}}
 			"{{.ColumnName}}": m.{{.Name}},{{end}}
-                }).Build()
-		defer Log(time.Now(), q, b...)
+                })
 
-                if result, err := db.Exec(q, b...); err != nil {
+                if result, err := ins.Exec(); err != nil {
 			errs.AddError("base", err)
                         return false, errs
                 } else {
@@ -35,13 +33,11 @@ func (m *{{.Name}}) Save(validate ...bool) (bool, *ar.Errors) {
 		}
                 return true, nil
         }else{
-		upd := ar.NewUpdate()
-		q, b := upd.Table("{{.TableName}}").Params(map[string]interface{}{ {{range .Fields}}
+		upd := ar.NewUpdate(db, logger).Table("{{.TableName}}").Params(map[string]interface{}{ {{range .Fields}}
 		"{{.ColumnName}}": m.{{.Name}},{{end}}
-		}).Where("{{.PrimaryKeyColumn}}", m.{{.PrimaryKeyField}}).Build()
-		defer Log(time.Now(), q, b...)
+		}).Where("{{.PrimaryKeyColumn}}", m.{{.PrimaryKeyField}})
 
-		if _, err := db.Exec(q, b...); err != nil {
+		if _, err := upd.Exec(); err != nil {
 			errs.AddError("base", err)
 			return false, errs
 		}
