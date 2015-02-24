@@ -314,6 +314,11 @@ if errs != nil {
 }
 ```
 
+## Log
+
+```go
+LogMode(true)
+```
 
 ## go generate
 
@@ -335,6 +340,7 @@ $ go generate
 - Callbacks (before/after save)
 - Conditions for callbacks and validations.
 - `AS` clause
+- Log options
 
 ## Author
 
