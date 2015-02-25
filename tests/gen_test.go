@@ -7,12 +7,13 @@ import (
 	"reflect"
 	"testing"
 
+	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/monochromegane/argen"
 )
 
 func TestMain(m *testing.M) {
-	db, err := sql.Open("sqlite3", ":memory:")
+	db, err := testDb()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -20,13 +21,11 @@ func TestMain(m *testing.M) {
 
 	Use(db)
 	LogMode(true)
-	sqlStmt := `
-	create table users (id integer not null primary key, name text, age integer);
-	create table posts (id integer not null primary key, user_id integer, name text);
-	`
-	_, err = db.Exec(sqlStmt)
-	if err != nil {
-		log.Fatal(err, sqlStmt)
+	for _, q := range testTables() {
+		_, err = db.Exec(q)
+		if err != nil {
+			log.Fatal(err, q)
+		}
 	}
 
 	os.Exit(m.Run())
@@ -50,7 +49,7 @@ func TestFind(t *testing.T) {
 	expect.Save()
 	defer User{}.DeleteAll()
 
-	u, err := User{}.Find(1)
+	u, err := User{}.Find(expect.Id)
 	assertError(t, err)
 	assertEqualStruct(t, expect, u)
 }
@@ -98,7 +97,7 @@ func TestWhere(t *testing.T) {
 	expect.Save()
 	defer User{}.DeleteAll()
 
-	u, err := User{}.Where("name", "test").And("id", 1).QueryRow()
+	u, err := User{}.Where("name", "test").And("id", expect.Id).QueryRow()
 
 	assertError(t, err)
 	assertEqualStruct(t, expect, u)
@@ -436,4 +435,32 @@ func assertError(t *testing.T, err error) {
 	if err != nil {
 		t.Errorf("error should be nil, but %v", err)
 	}
+}
+
+func testDb() (*sql.DB, error) {
+	switch os.Getenv("DB") {
+	case "mysql":
+		return sql.Open("mysql", "travis@/argen_test")
+	case "sqlite3", "":
+		return sql.Open("sqlite3", ":memory:")
+	}
+	return nil, nil
+}
+
+func testTables() []string {
+	switch os.Getenv("DB") {
+	case "mysql":
+		return []string{
+			"drop table if exists users;",
+			"drop table if exists posts;",
+			"create table users (id INTEGER PRIMARY KEY AUTO_INCREMENT, name text, age integer);",
+			"create table posts (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id integer not null, name text);",
+		}
+	case "sqlite3", "":
+		return []string{
+			"create table users (id integer PRIMARY KEY AUTOINCREMENT, name text, age integer);",
+			"create table posts (id integer PRIMARY KEY AUTOINCREMENT, user_id integer not null, name text);",
+		}
+	}
+	return []string{}
 }
