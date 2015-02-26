@@ -1,6 +1,6 @@
 # argen
 
-`argen` is an ORM code-generation tool for Go. It provides ActiveRecord-like functionality for your types.
+`argen` is an ORM code-generation tool for Go, provides ActiveRecord-like functionality for your types.
 
 ## Installation
 
