@@ -333,6 +333,9 @@ and type:
 ```
 $ go generate
 ```
+## Code status
+
+[![Build Status](https://travis-ci.org/monochromegane/argen.svg?branch=master)](https://travis-ci.org/monochromegane/argen)
 
 ## TODO
 
