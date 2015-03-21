@@ -15,6 +15,7 @@ func writeToFile(file, template string, structs structs) error {
 	if err != nil {
 		return err
 	}
+	defer f.Close()
 
 	w := bufio.NewWriter(f)
 	defer w.Flush()
