@@ -111,7 +111,7 @@ func (r *Relation) Explain() error {
 	for rows.Next() {
 		vals := make([]string, len(columns))
 		ptrs := make([]interface{}, len(columns))
-		for i, _ := range vals {
+		for i := range vals {
 			ptrs[i] = &vals[i]
 		}
 		rows.Scan(ptrs...)
