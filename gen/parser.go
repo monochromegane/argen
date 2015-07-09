@@ -101,9 +101,16 @@ func findStruct(specs []ast.Spec) (*structType, bool) {
 
 		st.Name = t.Name.Name
 		for _, f := range s.Fields.List {
+			var ident *ast.Ident
+			switch f.Type.(type) {
+			case *ast.Ident:
+				ident = f.Type.(*ast.Ident)
+			case *ast.SelectorExpr:
+				ident = f.Type.(*ast.SelectorExpr).Sel
+			}
 			field := field{
 				Name: f.Names[0].Name,
-				Type: f.Type.(*ast.Ident).Name,
+				Type: ident.Name,
 			}
 			if f.Tag != nil {
 				field.Tag = tag(f.Tag.Value)
