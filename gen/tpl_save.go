@@ -28,7 +28,7 @@ func (m *{{.Name}}) Save(validate ...bool) (bool, *ar.Errors) {
                         return false, errs
                 } else {
 			if lastId, err := result.LastInsertId(); err == nil {
-				m.Id = {{.PrimaryKeyType}}(lastId)
+				m.{{.PrimaryKeyField}} = {{.PrimaryKeyType}}(lastId)
 			}
 		}
                 return true, nil
