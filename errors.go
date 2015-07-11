@@ -27,3 +27,15 @@ func (e *Errors) message() map[string][]error {
 	}
 	return e.Messages
 }
+
+func (e *Errors) Error() string {
+	resp := ""
+	msgs := e.message()
+	for key, errs := range msgs {
+		resp += key + ": "
+		for _, m := range errs {
+			resp += m.Error() + ". "
+		}
+	}
+	return resp
+}
