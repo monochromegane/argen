@@ -11,7 +11,7 @@ func (m *{{.Name}}) IsPersistent() bool {
         return !m.IsNewRecord()
 }
 
-func (m *{{.Name}}) Save(validate ...bool) (bool, *ar.Errors) {
+func (m *{{.Name}}) Save(validate ...bool) (bool, error) {
 	if len(validate) == 0 || len(validate) > 0 && validate[0] {
 		if ok, errs := m.IsValid(); !ok {
 			return false, errs

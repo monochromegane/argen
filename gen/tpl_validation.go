@@ -3,7 +3,7 @@ package gen
 var validation = &Template{
 	Name: "Validation",
 	Text: `
-func (m {{.Name}}) IsValid() (bool, *ar.Errors) {
+func (m {{.Name}}) IsValid() (bool, error) {
         result := true
 	errors := &ar.Errors{}
 	var on ar.On

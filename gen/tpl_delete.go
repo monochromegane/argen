@@ -3,7 +3,7 @@ package gen
 var delete = &Template{
 	Name: "Delete",
 	Text: `
-func (m *{{.Name}}) Delete() (bool, *ar.Errors) {
+func (m *{{.Name}}) Delete() (bool, error) {
         errs := &ar.Errors{}
         if _, err := ar.NewDelete(db, logger).Table("{{.TableName}}").Where("{{.PrimaryKeyColumn}}", m.{{.PrimaryKeyField}}).Exec(); err != nil {
                 errs.AddError("base", err)
@@ -12,7 +12,7 @@ func (m *{{.Name}}) Delete() (bool, *ar.Errors) {
         return true, nil
 }
 
-func (m {{.Name}}) DeleteAll() (bool, *ar.Errors) {
+func (m {{.Name}}) DeleteAll() (bool, error) {
         errs := &ar.Errors{}
         if _, err := ar.NewDelete(db, logger).Table("{{.TableName}}").Exec(); err != nil {
                 errs.AddError("base", err)
