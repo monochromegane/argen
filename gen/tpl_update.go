@@ -3,7 +3,7 @@ package gen
 var update = &Template{
 	Name: "Update",
 	Text: `
-func (m *{{.Name}}) Update(p {{.Name}}Params) (bool, *ar.Errors) {
+func (m *{{.Name}}) Update(p {{.Name}}Params) (bool, error) {
 {{range .Fields}}
 	if !ar.IsZero(p.{{.Name}}) {
                 m.{{.Name}} = p.{{.Name}}
@@ -11,7 +11,7 @@ func (m *{{.Name}}) Update(p {{.Name}}Params) (bool, *ar.Errors) {
 	return m.Save()
 }
 
-func (m *{{.Name}}) UpdateColumns(p {{.Name}}Params) (bool, *ar.Errors) {
+func (m *{{.Name}}) UpdateColumns(p {{.Name}}Params) (bool, error) {
 {{range .Fields}}
 	if !ar.IsZero(p.{{.Name}}) {
                 m.{{.Name}} = p.{{.Name}}
